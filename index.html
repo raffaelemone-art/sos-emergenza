@@ -422,7 +422,7 @@ function setRing(frac) {
 /* ── Audio ── */
 function beep(freq, dur) {
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = ensureAudioCtx();
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.type = 'sine'; o.frequency.value = freq;
@@ -432,14 +432,26 @@ function beep(freq, dur) {
   } catch(e) {}
 }
 
+/* Crea/riusa AudioContext nel gestore del tocco utente — fix policy autoplay Android/Chrome */
+function ensureAudioCtx() {
+  try {
+    if (!audioCtx || audioCtx.state === 'closed') {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+  return audioCtx;
+}
+
 function startSiren() {
   try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = ensureAudioCtx();
+    sirenOscs = [];
     for (let i = 0; i < 30; i++) {
-      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-      o.connect(g); g.connect(audioCtx.destination);
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
       o.type = 'sawtooth';
-      const t = audioCtx.currentTime + i * 0.6;
+      const t = ctx.currentTime + i * 0.6;
       o.frequency.setValueAtTime(400, t);
       o.frequency.linearRampToValueAtTime(700, t + 0.3);
       o.frequency.linearRampToValueAtTime(400, t + 0.58);
@@ -463,6 +475,9 @@ function startCountdown() {
   const phone = document.getElementById('cfg-phone').value.trim();
   const sms   = document.getElementById('cfg-sms').value.trim();
   if (!email && !phone && !sms) { log('Configura almeno un\'email, SMS o numero di telefono.', 'warn'); return; }
+  /* Inizializza AudioContext subito nel gestore del tocco — sblocca audio su Android/Chrome */
+  ensureAudioCtx();
+
   document.getElementById('log').innerHTML = '';
   document.getElementById('sos-zone').style.display = 'none';
   document.getElementById('cd-wrap').classList.add('on');
