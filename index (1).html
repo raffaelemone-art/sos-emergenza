@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#dc2626"/>
+<meta name="description" content="App di emergenza personale con GPS, sirena e notifica email automatica"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="SOS Emergenza"/>
+<title>SOS Emergenza</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU09TIEVtZXJnZW56YSIsInNob3J0X25hbWUiOiJTT1MiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiI2RjMjYyNiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIzYVdSMGFEMGlNakF3SWlCb1pXbG5hSFE5SWpJd01DSWdkbWxsZDBKdmVEMGlNQ0l2UGc9PSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ=="/>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+:root {
+  --red:#dc2626; --red-dark:#b91c1c; --red-light:#fef2f2; --red-ring:rgba(220,38,38,0.25);
+  --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb; --gray-400:#9ca3af;
+  --gray-600:#4b5563; --gray-800:#1f2937; --gray-900:#111827;
+  --green:#16a34a; --green-bg:#f0fdf4; --amber:#b45309; --amber-bg:#fffbeb;
+  --blue:#1d4ed8; --blue-bg:#eff6ff; --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-900);overscroll-behavior:none}
+.app{max-width:440px;margin:0 auto;padding:1rem 1rem 2rem;min-height:100vh}
+
+/* Header */
+.header{display:flex;align-items:center;gap:10px;padding:1rem 0 1.25rem;border-bottom:1px solid var(--gray-200);margin-bottom:1.25rem}
+.header-icon{width:40px;height:40px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.header-icon svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.header-text h1{font-size:18px;font-weight:600;letter-spacing:-0.3px}
+.header-text p{font-size:12px;color:var(--gray-400);margin-top:1px}
+
+/* Card */
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);padding:1rem 1.125rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:var(--gray-400);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title svg{width:14px;height:14px;stroke:var(--gray-400);stroke-width:2;fill:none}
+
+/* Collapsible section */
+.section-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0;margin-bottom:0}
+.section-toggle .card-title{margin-bottom:0}
+.section-toggle .chevron{width:16px;height:16px;stroke:var(--gray-400);stroke-width:2;fill:none;transition:transform 0.2s}
+.section-toggle.open .chevron{transform:rotate(180deg)}
+.collapsible{overflow:hidden;max-height:0;transition:max-height 0.3s ease}
+.collapsible.open{max-height:800px}
+
+/* Form */
+.field{margin-bottom:12px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--gray-600);margin-bottom:5px}
+.field input{width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;color:var(--gray-900);background:var(--gray-50);outline:none;transition:border-color 0.15s,box-shadow 0.15s;-webkit-appearance:none}
+.field input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-ring);background:#fff}
+.field input::placeholder{color:var(--gray-400)}
+.field-hint{font-size:11px;color:var(--gray-400);margin-top:4px;line-height:1.4}
+
+/* EmailJS status badge */
+.ejs-status{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:12px;border:1px solid}
+.ejs-status.unconfigured{background:var(--amber-bg);color:var(--amber);border-color:#fde68a}
+.ejs-status.configured{background:var(--green-bg);color:var(--green);border-color:#bbf7d0}
+.ejs-status.error{background:var(--red-light);color:var(--red-dark);border-color:#fca5a5}
+.ejs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:currentColor}
+.ejs-link{font-size:11px;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:6px}
+.ejs-link:hover{text-decoration:underline}
+
+/* GPS */
+.gps-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);margin-bottom:10px}
+.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--gray-400);flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
+.gps-dot.ok{background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,0.2)}
+.gps-dot.err{background:var(--red)}
+.gps-dot.spin{animation:pulse 1s infinite;background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.gps-text{font-size:12px;color:var(--gray-600);line-height:1.4;flex:1}
+.btn-sm{font-size:13px;padding:7px 14px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);background:#fff;color:var(--gray-800);cursor:pointer;font-weight:500;transition:background 0.12s;display:inline-flex;align-items:center;gap:5px}
+.btn-sm:active{background:var(--gray-100)}
+.hint{font-size:11px;color:var(--gray-400);margin-top:6px}
+
+/* SOS */
+.sos-zone{text-align:center;padding:1.25rem 0 0.75rem}
+.sos-btn{width:160px;height:160px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,0.35);transition:transform 0.1s,box-shadow 0.15s;outline:none;-webkit-appearance:none}
+.sos-btn:active{transform:scale(0.96)}
+.sos-btn.pulsing{animation:sosPulse 1.2s ease-in-out infinite}
+@keyframes sosPulse{0%,100%{box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,0.35)}50%{box-shadow:0 0 0 24px rgba(220,38,38,0),0 4px 16px rgba(220,38,38,0.35)}}
+.sos-word{font-size:30px;font-weight:700;letter-spacing:3px;line-height:1}
+.sos-sub{font-size:10px;letter-spacing:1px;opacity:0.8;font-weight:500}
+
+/* Countdown */
+.cd-wrap{display:none;text-align:center;padding:1.25rem 0 0.75rem}
+.cd-wrap.on{display:block}
+.cd-ring{position:relative;width:160px;height:160px;margin:0 auto}
+.cd-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.cd-ring circle{fill:none;stroke-width:7}
+.cd-bg{stroke:var(--gray-200)}
+.cd-fill{stroke:var(--red);stroke-linecap:round;transition:stroke-dashoffset 0.85s linear}
+.cd-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cd-num{font-size:44px;font-weight:700;color:var(--red);line-height:1}
+.cd-label{font-size:11px;color:var(--gray-400);letter-spacing:1px;font-weight:500;margin-top:3px}
+.btn-cancel{margin-top:16px;display:inline-flex;align-items:center;gap:6px;padding:10px 28px;border:2px solid var(--red);border-radius:99px;background:#fff;color:var(--red);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.12s}
+.btn-cancel:active{background:var(--red-light)}
+.btn-stop{display:none;margin-top:12px;padding:9px 22px;border:1px solid var(--gray-200);border-radius:99px;background:#fff;color:var(--gray-800);font-size:13px;font-weight:500;cursor:pointer}
+.btn-stop.on{display:inline-block}
+
+/* Log */
+.log{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.log-item{font-size:12px;padding:7px 10px;border-radius:var(--radius-sm);display:flex;align-items:flex-start;gap:7px;line-height:1.4}
+.log-item svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;stroke-width:2;fill:none;stroke-linecap:round}
+.log-info{background:var(--blue-bg);color:var(--blue)}.log-info svg{stroke:var(--blue)}
+.log-ok{background:var(--green-bg);color:var(--green)}.log-ok svg{stroke:var(--green)}
+.log-warn{background:var(--amber-bg);color:var(--amber)}.log-warn svg{stroke:var(--amber)}
+.log-err{background:var(--red-light);color:var(--red-dark)}.log-err svg{stroke:var(--red-dark)}
+.log-purple{background:var(--purple-bg);color:var(--purple)}.log-purple svg{stroke:var(--purple)}
+.sep{border:none;border-top:1px solid var(--gray-200);margin:12px 0}
+
+/* Test button */
+.btn-test{font-size:12px;padding:6px 12px;border:1px solid var(--blue);border-radius:var(--radius-sm);background:var(--blue-bg);color:var(--blue);cursor:pointer;font-weight:500;transition:background 0.12s;display:inline-flex;align-items:center;gap:4px}
+.btn-test:active{background:#dbeafe}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="header-text">
+      <h1>SOS Emergenza</h1>
+      <p>Allarme personale con GPS, email, SMS e chiamata</p>
+    </div>
+  </div>
+
+  <!-- Card: Configurazione contatti -->
+  <div class="card">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Configurazione
+    </div>
+
+    <div class="field">
+      <label>Email di emergenza (destinatario)</label>
+      <input type="email" id="cfg-email" placeholder="familiare@gmail.com" autocomplete="email"/>
+      <div class="field-hint">Chi riceverà l'email di allarme con le coordinate GPS.</div>
+    </div>
+    <div class="field">
+      <label>Numero da chiamare</label>
+      <input type="tel" id="cfg-phone" placeholder="+393331234567" autocomplete="tel"/>
+      <div class="field-hint">Su mobile avvia la chiamata diretta. Su desktop apre il dialer.</div>
+    </div>
+    <div class="field">
+      <label>Numero per SMS di emergenza</label>
+      <input type="tel" id="cfg-sms" placeholder="+393331234567" autocomplete="tel"/>
+      <div class="field-hint">Riceverà un SMS con coordinate GPS e link Maps. Funziona solo su mobile (iOS/Android).</div>
+    </div>
+
+    <hr class="sep"/>
+
+    <!-- GPS -->
+    <div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      Posizione GPS
+    </div>
+    <div class="gps-bar">
+      <div class="gps-dot" id="gps-dot"></div>
+      <span class="gps-text" id="gps-text">Posizione non ancora acquisita</span>
+    </div>
+    <button class="btn-sm" onclick="getGPS()">
+      <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:var(--gray-600);stroke-width:2;fill:none"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+      Acquisisci posizione
+    </button>
+    <p class="hint">Aggiornata automaticamente all'attivazione SOS.</p>
+  </div>
+
+  <!-- Card: EmailJS -->
+  <div class="card">
+    <button class="section-toggle" id="ejs-toggle" onclick="toggleEJS()">
+      <div class="card-title" style="margin-bottom:0">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email automatica (EmailJS)
+      </div>
+      <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+
+    <div class="collapsible" id="ejs-section">
+      <div style="padding-top:14px">
+
+        <div class="ejs-status unconfigured" id="ejs-status">
+          <span class="ejs-dot"></span>
+          <span id="ejs-status-text">Chiavi EmailJS non configurate — l'email aprirà il client di posta come fallback.</span>
+        </div>
+
+        <div class="field">
+          <label>Public Key</label>
+          <input type="text" id="ejs-pubkey" placeholder="es. AbCdEfGhIjKlMnOpQr" autocomplete="off"/>
+          <div class="field-hint">Account → API Keys su emailjs.com</div>
+        </div>
+        <div class="field">
+          <label>Service ID</label>
+          <input type="text" id="ejs-service" placeholder="es. service_xxxxxxx" autocomplete="off"/>
+          <div class="field-hint">Email Services → seleziona il tuo servizio</div>
+        </div>
+        <div class="field">
+          <label>Template ID</label>
+          <input type="text" id="ejs-template" placeholder="es. template_xxxxxxx" autocomplete="off"/>
+          <div class="field-hint">Email Templates → seleziona il tuo template</div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn-sm" onclick="saveEJS()">
+            <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;stroke-width:2;fill:none"><polyline points="20 6 9 17 4 12"/></svg>
+            Salva chiavi
+          </button>
+          <button class="btn-test" onclick="testEmail()">
+            <svg viewBox="0 0 24 24" width="13" height="13" style="stroke:currentColor;stroke-width:2;fill:none"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+            Invia email di test
+          </button>
+        </div>
+
+        <a class="ejs-link" href="https://www.emailjs.com" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="11" height="11" style="stroke:currentColor;stroke-width:2;fill:none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Apri emailjs.com per ottenere le chiavi (gratuito, 200 email/mese)
+        </a>
+
+        <div style="margin-top:10px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:11px;color:var(--gray-600);line-height:1.6">
+          <strong style="display:block;margin-bottom:4px;color:var(--gray-800)">Come configurare il template EmailJS:</strong>
+          Nel template usa queste variabili:<br/>
+          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{to_email}}</code> — destinatario &nbsp;
+          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{gps_coords}}</code> — coordinate<br/>
+          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{maps_link}}</code> — link Maps &nbsp;
+          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{datetime}}</code> — data e ora
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: SOS -->
+  <div class="card">
+    <div class="sos-zone" id="sos-zone">
+      <button class="sos-btn" id="sos-btn" onclick="startCountdown()" aria-label="Attiva allarme SOS">
+        <span class="sos-word">SOS</span>
+        <span class="sos-sub">PREMI PER ATTIVARE</span>
+      </button>
+    </div>
+
+    <div class="cd-wrap" id="cd-wrap">
+      <div class="cd-ring">
+        <svg viewBox="0 0 160 160" width="160" height="160">
+          <circle class="cd-bg" cx="80" cy="80" r="68"/>
+          <circle class="cd-fill" id="cd-fill" cx="80" cy="80" r="68"/>
+        </svg>
+        <div class="cd-inner">
+          <span class="cd-num" id="cd-num">10</span>
+          <span class="cd-label">SECONDI</span>
+        </div>
+      </div>
+      <br/>
+      <button class="btn-cancel" onclick="cancelCountdown()">
+        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--red);stroke-width:2.5;fill:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Annulla allarme
+      </button>
+    </div>
+
+    <div style="text-align:center">
+      <button class="btn-stop" id="btn-stop" onclick="stopSOS()">&#9632; Interrompi allarme</button>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+</div>
+
+<script>
+const SECS = 10;
+const CIRC = 2 * Math.PI * 68;
+
+let gpsCoords = null;
+let audioCtx = null;
+let sirenOscs = [];
+let sosActive = false;
+let cdInterval = null;
+let cdLeft = SECS;
+let ejsReady = false;
+
+/* ── Storage ── */
+function save(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+function load(k) { try { return localStorage.getItem(k) || ''; } catch(e) { return ''; } }
+
+function loadConfig() {
+  document.getElementById('cfg-email').value    = load('sos_email');
+  document.getElementById('cfg-phone').value    = load('sos_phone');
+  document.getElementById('cfg-sms').value      = load('sos_sms');
+  document.getElementById('ejs-pubkey').value   = load('ejs_pubkey');
+  document.getElementById('ejs-service').value  = load('ejs_service');
+  document.getElementById('ejs-template').value = load('ejs_template');
+  initEJS();
+}
+
+['cfg-email','cfg-phone','cfg-sms'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    save('sos_' + id.replace('cfg-',''), document.getElementById(id).value);
+  });
+});
+
+/* ── EmailJS ── */
+function initEJS() {
+  const pk  = document.getElementById('ejs-pubkey').value.trim();
+  const svc = document.getElementById('ejs-service').value.trim();
+  const tpl = document.getElementById('ejs-template').value.trim();
+  const st  = document.getElementById('ejs-status');
+  const stxt = document.getElementById('ejs-status-text');
+
+  if (pk && svc && tpl) {
+    try {
+      emailjs.init({ publicKey: pk });
+      ejsReady = true;
+      st.className = 'ejs-status configured';
+      stxt.textContent = 'EmailJS configurato — email inviate automaticamente in background.';
+    } catch(e) {
+      ejsReady = false;
+      st.className = 'ejs-status error';
+      stxt.textContent = 'Errore inizializzazione EmailJS: ' + e.message;
+    }
+  } else {
+    ejsReady = false;
+    st.className = 'ejs-status unconfigured';
+    stxt.textContent = 'Chiavi EmailJS non configurate — l\'email aprirà il client di posta come fallback.';
+  }
+}
+
+function saveEJS() {
+  save('ejs_pubkey',   document.getElementById('ejs-pubkey').value.trim());
+  save('ejs_service',  document.getElementById('ejs-service').value.trim());
+  save('ejs_template', document.getElementById('ejs-template').value.trim());
+  initEJS();
+  log(ejsReady ? 'Chiavi EmailJS salvate e attive.' : 'Chiavi salvate ma incomplete — controlla i campi.', ejsReady ? 'ok' : 'warn');
+}
+
+async function sendViaEmailJS(coords) {
+  const svc = document.getElementById('ejs-service').value.trim();
+  const tpl = document.getElementById('ejs-template').value.trim();
+  const toEmail = document.getElementById('cfg-email').value.trim();
+
+  const mapsLink = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
+  const gpsStr   = coords ? `${coords.lat}, ${coords.lng} (±${coords.acc}m)` : 'Non disponibile';
+  const dt       = new Date().toLocaleString('it-IT');
+
+  const params = {
+    to_email:   toEmail,
+    gps_coords: gpsStr,
+    maps_link:  mapsLink,
+    datetime:   dt,
+    message:    `ALLARME EMERGENZA\nData: ${dt}\nGPS: ${gpsStr}\nMaps: ${mapsLink}`
+  };
+
+  await emailjs.send(svc, tpl, params);
+}
+
+async function testEmail() {
+  const toEmail = document.getElementById('cfg-email').value.trim();
+  if (!toEmail) { log('Inserisci prima l\'email di emergenza.', 'warn'); return; }
+  if (!ejsReady) { log('Configura prima le chiavi EmailJS.', 'warn'); return; }
+  log('Invio email di test…', 'info');
+  try {
+    await sendViaEmailJS(gpsCoords);
+    log('Email di test inviata con successo!', 'ok');
+  } catch(e) {
+    log('Errore invio test: ' + (e.text || e.message || JSON.stringify(e)), 'err');
+  }
+}
+
+function toggleEJS() {
+  const btn = document.getElementById('ejs-toggle');
+  const sec = document.getElementById('ejs-section');
+  btn.classList.toggle('open');
+  sec.classList.toggle('open');
+}
+
+/* ── GPS ── */
+function getGPS() {
+  if (!navigator.geolocation) { gpsErr('GPS non supportato'); return; }
+  const dot = document.getElementById('gps-dot');
+  dot.className = 'gps-dot spin';
+  document.getElementById('gps-text').textContent = 'Acquisizione in corso…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      gpsCoords = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
+      dot.className = 'gps-dot ok';
+      document.getElementById('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc}m)`;
+    },
+    () => gpsErr('Permesso negato o timeout. Riprova.'),
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+}
+function gpsErr(msg) {
+  document.getElementById('gps-dot').className = 'gps-dot err';
+  document.getElementById('gps-text').textContent = msg;
+}
+
+/* ── Log ── */
+const ICONS = {
+  info:   '<path d="M12 16v-4M12 8h.01"/><circle cx="12" cy="12" r="10"/>',
+  ok:     '<polyline points="20 6 9 17 4 12"/>',
+  warn:   '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/>',
+  err:    '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  purple: '<path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>'
+};
+function log(msg, type='info') {
+  const c = document.getElementById('log');
+  const d = document.createElement('div');
+  d.className = `log-item log-${type}`;
+  d.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[type]||ICONS.info}</svg><span>${msg}</span>`;
+  c.prepend(d);
+}
+
+/* ── Ring ── */
+function setRing(frac) {
+  const el = document.getElementById('cd-fill');
+  el.style.strokeDasharray = CIRC;
+  el.style.strokeDashoffset = CIRC * (1 - frac);
+}
+
+/* ── Audio ── */
+function beep(freq, dur) {
+  try {
+    const ctx = ensureAudioCtx();
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.22, ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+    o.start(); o.stop(ctx.currentTime + dur + 0.02);
+  } catch(e) {}
+}
+
+/* Crea/riusa AudioContext nel gestore del tocco utente — fix policy autoplay Android/Chrome */
+function ensureAudioCtx() {
+  try {
+    if (!audioCtx || audioCtx.state === 'closed') {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+  return audioCtx;
+}
+
+function startSiren() {
+  try {
+    const ctx = ensureAudioCtx();
+    sirenOscs = [];
+    for (let i = 0; i < 30; i++) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sawtooth';
+      const t = ctx.currentTime + i * 0.6;
+      o.frequency.setValueAtTime(400, t);
+      o.frequency.linearRampToValueAtTime(700, t + 0.3);
+      o.frequency.linearRampToValueAtTime(400, t + 0.58);
+      g.gain.setValueAtTime(0.28, t);
+      g.gain.linearRampToValueAtTime(0, t + 0.55);
+      o.start(t); o.stop(t + 0.6);
+      sirenOscs.push(o);
+    }
+  } catch(e) {}
+}
+
+function stopSiren() {
+  sirenOscs.forEach(o => { try { o.stop(); } catch(e) {} });
+  sirenOscs = [];
+  if (audioCtx) { try { audioCtx.close(); } catch(e) {} audioCtx = null; }
+}
+
+/* ── Countdown ── */
+function startCountdown() {
+  const email = document.getElementById('cfg-email').value.trim();
+  const phone = document.getElementById('cfg-phone').value.trim();
+  const sms   = document.getElementById('cfg-sms').value.trim();
+  if (!email && !phone && !sms) { log('Configura almeno un\'email, SMS o numero di telefono.', 'warn'); return; }
+  /* Inizializza AudioContext subito nel gestore del tocco — sblocca audio su Android/Chrome */
+  ensureAudioCtx();
+
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('sos-zone').style.display = 'none';
+  document.getElementById('cd-wrap').classList.add('on');
+  cdLeft = SECS;
+  document.getElementById('cd-num').textContent = SECS;
+  setRing(1);
+  log(`Allarme tra ${SECS} secondi. Premi "Annulla" per fermare.`, 'warn');
+
+  cdInterval = setInterval(() => {
+    cdLeft--;
+    document.getElementById('cd-num').textContent = cdLeft;
+    setRing(cdLeft / SECS);
+    beep(cdLeft <= 3 ? 900 : 520, 0.15);
+    if (cdLeft <= 0) {
+      clearInterval(cdInterval); cdInterval = null;
+      document.getElementById('cd-wrap').classList.remove('on');
+      document.getElementById('sos-zone').style.display = '';
+      triggerSOS();
+    }
+  }, 1000);
+}
+
+function cancelCountdown() {
+  if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
+  document.getElementById('cd-wrap').classList.remove('on');
+  document.getElementById('sos-zone').style.display = '';
+  log('Allarme annullato prima dell\'invio.', 'warn');
+}
+
+/* ── SMS ── */
+function buildSMSText(coords) {
+  const dt = new Date().toLocaleString('it-IT');
+  const mapsLink = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : null;
+  const gpsStr   = coords ? `${coords.lat},${coords.lng} (±${coords.acc}m)` : 'GPS N/D';
+  let txt = `🚨 ALLARME EMERGENZA\nOra: ${dt}\nGPS: ${gpsStr}`;
+  if (mapsLink) txt += `\nMaps: ${mapsLink}`;
+  txt += `\n— App SOS Emergenza`;
+  return txt;
+}
+
+function sendSMS(smsNumber, coords) {
+  const body = encodeURIComponent(buildSMSText(coords));
+  /* sms: con corpo funziona su iOS (?&body=) e Android (?body=) */
+  const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
+  window.location.href = `sms:${smsNumber}${sep}body=${body}`;
+}
+
+/* ── SOS principale ── */
+async function triggerSOS() {
+  sosActive = true;
+  const email = document.getElementById('cfg-email').value.trim();
+  const phone  = document.getElementById('cfg-phone').value.trim();
+  const sms    = document.getElementById('cfg-sms').value.trim();
+
+  document.getElementById('sos-btn').classList.add('pulsing');
+  document.getElementById('btn-stop').classList.add('on');
+
+  log('🚨 Allarme SOS attivato!', 'err');
+  startSiren();
+  log('Sirena attivata.', 'info');
+  log('Acquisizione posizione GPS…', 'info');
+
+  await new Promise(resolve => {
+    if (!navigator.geolocation) { log('GPS non supportato.', 'warn'); resolve(); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        gpsCoords = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
+        document.getElementById('gps-dot').className = 'gps-dot ok';
+        document.getElementById('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc}m)`;
+        log(`Posizione: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc}m)`, 'ok');
+        resolve();
+      },
+      () => { log('GPS non disponibile. Procedo senza coordinate.', 'warn'); resolve(); },
+      { enableHighAccuracy: true, timeout: 7000 }
+    );
+  });
+
+  /* ── EMAIL ── */
+  if (email) {
+    if (ejsReady) {
+      /* Invio automatico via EmailJS — nessun client di posta */
+      log('Invio email automatica via EmailJS…', 'purple');
+      try {
+        await sendViaEmailJS(gpsCoords);
+        log('✅ Email inviata automaticamente!', 'ok');
+      } catch(e) {
+        log('EmailJS fallito (' + (e.text || e.message || 'errore') + '). Apro client di posta…', 'warn');
+        _openMailto(email);
+      }
+    } else {
+      /* Fallback: client di posta */
+      log('EmailJS non configurato — apertura client di posta…', 'warn');
+      setTimeout(() => _openMailto(email), 400);
+    }
+  }
+
+  /* ── SMS ── */
+  if (sms) {
+    const smsDelay = email ? 2400 : 400;
+    setTimeout(() => {
+      log(`Invio SMS verso ${sms}…`, 'info');
+      sendSMS(sms, gpsCoords);
+      log('SMS con coordinate GPS inviato.', 'ok');
+    }, smsDelay);
+  }
+
+  /* ── CHIAMATA ── */
+  if (phone) {
+    const callDelay = (email && sms) ? 5000 : (email || sms) ? 3000 : 400;
+    setTimeout(() => {
+      log(`Avvio chiamata verso ${phone}…`, 'info');
+      window.location.href = `tel:${phone}`;
+    }, callDelay);
+  }
+}
+
+function _openMailto(email) {
+  const coords = gpsCoords;
+  const mapsLink = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
+  const gpsStr   = coords ? `${coords.lat}, ${coords.lng} (precisione +/-${coords.acc}m)` : 'Non disponibile';
+  const dt       = new Date().toLocaleString('it-IT');
+  const body = `ALLARME DI EMERGENZA\n\nData e ora: ${dt}\n\nCoordinate GPS: ${gpsStr}\nGoogle Maps: ${mapsLink}\n\nQuesto messaggio e' stato inviato automaticamente dall'app SOS Emergenza.`;
+  window.location.href = `mailto:${email}?subject=${encodeURIComponent('ALLARME EMERGENZA - richiesta soccorso')}&body=${encodeURIComponent(body)}`;
+  log('Email aperta nel client di posta.', 'ok');
+}
+
+function stopSOS() {
+  sosActive = false;
+  stopSiren();
+  document.getElementById('sos-btn').classList.remove('pulsing');
+  document.getElementById('btn-stop').classList.remove('on');
+  log('Allarme interrotto.', 'warn');
+}
+
+/* ── Init ── */
+loadConfig();
+
+/* ── Service Worker PWA ── */
+if ('serviceWorker' in navigator) {
+  const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' }))).catch(()=>{});
+}
+</script>
+</body>
+</html>
