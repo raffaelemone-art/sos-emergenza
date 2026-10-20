@@ -2,249 +2,364 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="theme-color" content="#dc2626"/>
-<meta name="description" content="App di emergenza personale con GPS, sirena e notifica email automatica"/>
+<meta name="description" content="App di emergenza personale con GPS, sirena, email, SMS e chiamata"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="SOS Emergenza"/>
 <title>SOS Emergenza</title>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU09TIEVtZXJnZW56YSIsInNob3J0X25hbWUiOiJTT1MiLCJzdGFydF91cmwiOiIuIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiI2RjMjYyNiIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIzYVdSMGFEMGlNakF3SWlCb1pXbG5hSFE5SWpJd01DSWdkbWxsZDBKdmVEMGlNQ0l2UGc9PSIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ=="/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="icon" href="icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
-:root {
-  --red:#dc2626; --red-dark:#b91c1c; --red-light:#fef2f2; --red-ring:rgba(220,38,38,0.25);
-  --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb; --gray-400:#9ca3af;
-  --gray-600:#4b5563; --gray-800:#1f2937; --gray-900:#111827;
-  --green:#16a34a; --green-bg:#f0fdf4; --amber:#b45309; --amber-bg:#fffbeb;
-  --blue:#1d4ed8; --blue-bg:#eff6ff; --purple:#7c3aed; --purple-bg:#f5f3ff;
-  --radius:12px; --radius-sm:8px;
+:root{
+  --red:#dc2626;--red-dark:#b91c1c;--red-light:#fef2f2;--red-ring:rgba(220,38,38,0.25);
+  --gray-50:#f9fafb;--gray-100:#f3f4f6;--gray-200:#e5e7eb;--gray-400:#9ca3af;--gray-500:#6b7280;
+  --gray-600:#4b5563;--gray-800:#1f2937;--gray-900:#111827;
+  --green:#15803d;--green-bg:#f0fdf4;--amber:#b45309;--amber-bg:#fffbeb;
+  --blue:#1d4ed8;--blue-bg:#eff6ff;--purple:#7c3aed;--purple-bg:#f5f3ff;
+  --radius:14px;--radius-sm:10px;
   --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-900);overscroll-behavior:none}
-.app{max-width:440px;margin:0 auto;padding:1rem 1rem 2rem;min-height:100vh}
+html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--gray-50);color:var(--gray-900);font-size:16px;line-height:1.45}
+body.wizard{padding-bottom:150px}
+.app{max-width:480px;margin:0 auto;padding:1rem 1rem 2.5rem}
 
-/* Header */
-.header{display:flex;align-items:center;gap:10px;padding:1rem 0 1.25rem;border-bottom:1px solid var(--gray-200);margin-bottom:1.25rem}
-.header-icon{width:40px;height:40px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center}
-.header-icon svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
-.header-text h1{font-size:18px;font-weight:600;letter-spacing:-0.3px}
-.header-text p{font-size:12px;color:var(--gray-400);margin-top:1px}
+.header{display:flex;align-items:center;gap:12px;padding:.75rem 0 1rem}
+.header-icon{width:44px;height:44px;background:var(--red);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.header-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.header-text h1{font-size:20px;font-weight:700;letter-spacing:-0.3px}
+.header-text p{font-size:13px;color:var(--gray-500)}
 
-/* Card */
-.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);padding:1rem 1.125rem;margin-bottom:1rem;box-shadow:var(--shadow)}
-.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:var(--gray-400);margin-bottom:12px;display:flex;align-items:center;gap:6px}
-.card-title svg{width:14px;height:14px;stroke:var(--gray-400);stroke-width:2;fill:none}
+.ready{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius);border:1px solid;margin-bottom:1rem;font-size:14px;font-weight:500}
+.ready.ok{background:var(--green-bg);color:var(--green);border-color:#bbf7d0}
+.ready.todo{background:var(--amber-bg);color:var(--amber);border-color:#fde68a}
+.ready-dot{width:10px;height:10px;border-radius:50%;background:currentColor;flex-shrink:0}
+.ready small{display:block;font-weight:400;font-size:12px;opacity:.9}
 
-/* Collapsible section */
-.section-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0;margin-bottom:0}
+.card{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius);padding:1.1rem 1.15rem;margin-bottom:1rem;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gray-500);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.card-title svg{width:15px;height:15px;stroke:var(--gray-500);stroke-width:2;fill:none}
+.card-lead{font-size:14px;color:var(--gray-600);margin:-4px 0 12px}
+
+.welcome{text-align:center;padding:1.6rem 1.25rem}
+.welcome .big{width:84px;height:84px;border-radius:24px;background:var(--red);margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+.welcome .big svg{width:46px;height:46px;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.welcome h2{font-size:22px;margin-bottom:8px}
+.welcome p{font-size:15px;color:var(--gray-600);margin-bottom:14px}
+.steps-list{text-align:left;display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.steps-list div{display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.steps-list b{width:28px;height:28px;border-radius:50%;background:var(--red-light);color:var(--red-dark);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+.section-toggle{width:100%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding:0;text-align:left;font-family:inherit}
 .section-toggle .card-title{margin-bottom:0}
-.section-toggle .chevron{width:16px;height:16px;stroke:var(--gray-400);stroke-width:2;fill:none;transition:transform 0.2s}
+.section-toggle .chevron{width:18px;height:18px;stroke:var(--gray-500);stroke-width:2;fill:none;transition:transform .2s}
 .section-toggle.open .chevron{transform:rotate(180deg)}
-.collapsible{overflow:hidden;max-height:0;transition:max-height 0.3s ease}
-.collapsible.open{max-height:800px}
+.collapsible{overflow:hidden;max-height:0;transition:max-height .3s ease}
+.collapsible.open{max-height:1600px}
 
-/* Form */
-.field{margin-bottom:12px}
+.field{margin-bottom:13px}
 .field:last-child{margin-bottom:0}
-.field label{display:block;font-size:13px;font-weight:500;color:var(--gray-600);margin-bottom:5px}
-.field input{width:100%;padding:10px 12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:15px;color:var(--gray-900);background:var(--gray-50);outline:none;transition:border-color 0.15s,box-shadow 0.15s;-webkit-appearance:none}
-.field input:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-ring);background:#fff}
-.field input::placeholder{color:var(--gray-400)}
-.field-hint{font-size:11px;color:var(--gray-400);margin-top:4px;line-height:1.4}
+.field label{display:block;font-size:14px;font-weight:600;color:var(--gray-800);margin-bottom:5px}
+.field label .opt{font-weight:400;color:var(--gray-500);font-size:12px}
+.field input,.field select,.field textarea{width:100%;padding:12px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);font-size:16px;font-family:inherit;color:var(--gray-900);background:var(--gray-50);outline:none;transition:border-color .15s,box-shadow .15s;-webkit-appearance:none;appearance:none}
+.field textarea{resize:vertical;min-height:64px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px var(--red-ring);background:#fff}
+.field input.bad{border-color:var(--red)}
+.field-hint{font-size:12px;color:var(--gray-500);margin-top:4px}
+.field-hint.bad{color:var(--red-dark)}
+.field-hint.good{color:var(--green)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2 .field{margin-bottom:13px}
 
-/* EmailJS status badge */
-.ejs-status{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--radius-sm);font-size:12px;margin-bottom:12px;border:1px solid}
+.contact{border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;background:var(--gray-50)}
+.contact-h{font-size:14px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.contact-h span{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--red-light);color:var(--red-dark)}
+.contact-h span.opt{background:var(--gray-200);color:var(--gray-600)}
+.contact .field input{background:#fff}
+
+.ejs-status{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;margin:14px 0 12px;border:1px solid}
 .ejs-status.unconfigured{background:var(--amber-bg);color:var(--amber);border-color:#fde68a}
 .ejs-status.configured{background:var(--green-bg);color:var(--green);border-color:#bbf7d0}
 .ejs-status.error{background:var(--red-light);color:var(--red-dark);border-color:#fca5a5}
-.ejs-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:currentColor}
-.ejs-link{font-size:11px;color:var(--blue);text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-top:6px}
-.ejs-link:hover{text-decoration:underline}
+.ejs-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:currentColor}
+.ejs-link{font-size:13px;color:var(--blue);text-decoration:none;display:inline-block;margin-top:10px}
+.tpl-box{margin-top:12px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:12px;color:var(--gray-600);line-height:1.9}
+.tpl-box code{background:var(--gray-100);padding:1px 5px;border-radius:4px;font-size:11.5px}
 
-/* GPS */
-.gps-bar{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);margin-bottom:10px}
-.gps-dot{width:9px;height:9px;border-radius:50%;background:var(--gray-400);flex-shrink:0;transition:background 0.3s,box-shadow 0.3s}
-.gps-dot.ok{background:var(--green);box-shadow:0 0 0 3px rgba(22,163,74,0.2)}
+.gps-bar{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);margin-bottom:10px}
+.gps-dot{width:10px;height:10px;border-radius:50%;background:var(--gray-400);flex-shrink:0}
+.gps-dot.ok{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.2)}
 .gps-dot.err{background:var(--red)}
-.gps-dot.spin{animation:pulse 1s infinite;background:var(--amber)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.gps-text{font-size:12px;color:var(--gray-600);line-height:1.4;flex:1}
-.btn-sm{font-size:13px;padding:7px 14px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);background:#fff;color:var(--gray-800);cursor:pointer;font-weight:500;transition:background 0.12s;display:inline-flex;align-items:center;gap:5px}
+.gps-dot.spin{animation:pulse 1s infinite;background:#d97706}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.gps-text{font-size:13px;color:var(--gray-600);flex:1}
+.btn-sm{font-size:14px;padding:10px 16px;border:1px solid var(--gray-200);border-radius:var(--radius-sm);background:#fff;color:var(--gray-800);cursor:pointer;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:6px;min-height:44px}
 .btn-sm:active{background:var(--gray-100)}
-.hint{font-size:11px;color:var(--gray-400);margin-top:6px}
+.btn-test{font-size:14px;padding:10px 16px;border:1px solid var(--blue);border-radius:var(--radius-sm);background:var(--blue-bg);color:var(--blue);cursor:pointer;font-weight:600;font-family:inherit;min-height:44px}
+.hint{font-size:12px;color:var(--gray-500);margin-top:8px}
+.check{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--gray-800);margin-top:14px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--red)}
+.testbanner{display:none;margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--amber-bg);color:var(--amber);font-size:13px;font-weight:600;text-align:center;border:1px solid #fde68a}
+.testbanner.on{display:block}
 
-/* SOS */
-.sos-zone{text-align:center;padding:1.25rem 0 0.75rem}
-.sos-btn{width:160px;height:160px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,0.35);transition:transform 0.1s,box-shadow 0.15s;outline:none;-webkit-appearance:none}
-.sos-btn:active{transform:scale(0.96)}
+.sos-zone{text-align:center;padding:1.25rem 0 .75rem}
+.sos-btn{width:180px;height:180px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,.35);transition:transform .1s;outline:none;-webkit-appearance:none;font-family:inherit}
+.sos-btn:active{transform:scale(.96)}
+.sos-btn.test{background:#d97706}
 .sos-btn.pulsing{animation:sosPulse 1.2s ease-in-out infinite}
-@keyframes sosPulse{0%,100%{box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,0.35)}50%{box-shadow:0 0 0 24px rgba(220,38,38,0),0 4px 16px rgba(220,38,38,0.35)}}
-.sos-word{font-size:30px;font-weight:700;letter-spacing:3px;line-height:1}
-.sos-sub{font-size:10px;letter-spacing:1px;opacity:0.8;font-weight:500}
+@keyframes sosPulse{0%,100%{box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,.35)}50%{box-shadow:0 0 0 26px rgba(220,38,38,0),0 4px 16px rgba(220,38,38,.35)}}
+.sos-word{font-size:36px;font-weight:800;letter-spacing:3px;line-height:1}
+.sos-sub{font-size:11px;letter-spacing:1px;opacity:.9;font-weight:600}
 
-/* Countdown */
-.cd-wrap{display:none;text-align:center;padding:1.25rem 0 0.75rem}
+.cd-wrap{display:none;text-align:center;padding:1.25rem 0 .75rem}
 .cd-wrap.on{display:block}
-.cd-ring{position:relative;width:160px;height:160px;margin:0 auto}
+.cd-ring{position:relative;width:170px;height:170px;margin:0 auto}
 .cd-ring svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
-.cd-ring circle{fill:none;stroke-width:7}
+.cd-ring circle{fill:none;stroke-width:8}
 .cd-bg{stroke:var(--gray-200)}
-.cd-fill{stroke:var(--red);stroke-linecap:round;transition:stroke-dashoffset 0.85s linear}
+.cd-fill{stroke:var(--red);stroke-linecap:round;transition:stroke-dashoffset .85s linear}
 .cd-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.cd-num{font-size:44px;font-weight:700;color:var(--red);line-height:1}
-.cd-label{font-size:11px;color:var(--gray-400);letter-spacing:1px;font-weight:500;margin-top:3px}
-.btn-cancel{margin-top:16px;display:inline-flex;align-items:center;gap:6px;padding:10px 28px;border:2px solid var(--red);border-radius:99px;background:#fff;color:var(--red);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.12s}
+.cd-num{font-size:48px;font-weight:800;color:var(--red);line-height:1}
+.cd-label{font-size:12px;color:var(--gray-500);letter-spacing:1px;font-weight:600;margin-top:3px}
+.btn-cancel{margin-top:16px;display:inline-flex;align-items:center;gap:6px;padding:14px 32px;border:2px solid var(--red);border-radius:99px;background:#fff;color:var(--red);font-size:16px;font-weight:700;cursor:pointer;font-family:inherit}
 .btn-cancel:active{background:var(--red-light)}
-.btn-stop{display:none;margin-top:12px;padding:9px 22px;border:1px solid var(--gray-200);border-radius:99px;background:#fff;color:var(--gray-800);font-size:13px;font-weight:500;cursor:pointer}
+.btn-stop{display:none;margin-top:12px;padding:13px 28px;border:1px solid var(--gray-800);border-radius:99px;background:var(--gray-800);color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .btn-stop.on{display:inline-block}
 
-/* Log */
-.log{margin-top:12px;display:flex;flex-direction:column;gap:6px}
-.log-item{font-size:12px;padding:7px 10px;border-radius:var(--radius-sm);display:flex;align-items:flex-start;gap:7px;line-height:1.4}
-.log-item svg{width:14px;height:14px;flex-shrink:0;margin-top:1px;stroke-width:2;fill:none;stroke-linecap:round}
+.actions{display:none;margin-top:14px;grid-template-columns:1fr 1fr;gap:10px}
+.actions.on{display:grid}
+.act{padding:14px 8px;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:700;cursor:pointer;color:#fff;font-family:inherit;min-height:52px}
+.act.call{background:var(--red)}.act.sms{background:#2563eb}.act.mail{background:#7c3aed}.act.share{background:#0f766e}
+.actions-note{display:none;font-size:12px;color:var(--gray-500);text-align:center;margin-top:8px}
+.actions-note.on{display:block}
+
+.log{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.log-item{font-size:13px;padding:8px 10px;border-radius:var(--radius-sm);display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.log-item svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;stroke-width:2;fill:none;stroke-linecap:round}
 .log-info{background:var(--blue-bg);color:var(--blue)}.log-info svg{stroke:var(--blue)}
 .log-ok{background:var(--green-bg);color:var(--green)}.log-ok svg{stroke:var(--green)}
 .log-warn{background:var(--amber-bg);color:var(--amber)}.log-warn svg{stroke:var(--amber)}
 .log-err{background:var(--red-light);color:var(--red-dark)}.log-err svg{stroke:var(--red-dark)}
 .log-purple{background:var(--purple-bg);color:var(--purple)}.log-purple svg{stroke:var(--purple)}
-.sep{border:none;border-top:1px solid var(--gray-200);margin:12px 0}
+.sep{border:none;border-top:1px solid var(--gray-200);margin:16px 0}
+.privacy{font-size:12px;color:var(--gray-500);text-align:center;padding:0 .5rem;line-height:1.5}
+.disclaimer{font-size:12px;color:var(--gray-500);text-align:center;margin-top:8px}
+.linkbtn{background:none;border:none;color:var(--blue);font-size:13px;font-family:inherit;cursor:pointer;text-decoration:underline;margin-top:10px;display:block;margin-left:auto;margin-right:auto}
 
-/* Test button */
-.btn-test{font-size:12px;padding:6px 12px;border:1px solid var(--blue);border-radius:var(--radius-sm);background:var(--blue-bg);color:var(--blue);cursor:pointer;font-weight:500;transition:background 0.12s;display:inline-flex;align-items:center;gap:4px}
-.btn-test:active{background:#dbeafe}
+/* Barra guida */
+.wizbar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--gray-200);box-shadow:0 -4px 16px rgba(0,0,0,.08);z-index:50}
+.wizbar-in{max-width:480px;margin:0 auto;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+.wiz-msg{display:none;font-size:13px;color:var(--red-dark);background:var(--red-light);padding:8px 10px;border-radius:var(--radius-sm);margin-bottom:8px}
+.wiz-msg.on{display:block}
+.wiz-prog{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--gray-600);margin-bottom:8px;font-weight:600}
+.wiz-dots{display:flex;gap:6px}
+.wiz-dots i{width:22px;height:6px;border-radius:3px;background:var(--gray-200)}
+.wiz-dots i.on{background:var(--red)}
+.wiz-btns{display:flex;gap:10px}
+.wiz-btns .btn-sm{flex:0 0 auto}
+.wiz-next{flex:1;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);font-size:17px;font-weight:700;padding:14px;cursor:pointer;font-family:inherit;min-height:52px}
+.wiz-skip{background:none;border:none;color:var(--gray-500);font-size:12px;font-family:inherit;cursor:pointer;margin:8px auto 0;display:block;text-decoration:underline}
 </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- Header -->
   <div class="header">
     <div class="header-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <div class="header-text">
       <h1>SOS Emergenza</h1>
-      <p>Allarme personale con GPS, email, SMS e chiamata</p>
+      <p>Chiedi aiuto con un tocco</p>
     </div>
   </div>
 
-  <!-- Card: Configurazione contatti -->
-  <div class="card">
+  <!-- Benvenuto (solo guida) -->
+  <div class="card welcome" data-show="w1">
+    <div class="big"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></div>
+    <h2>Benvenuto!</h2>
+    <p>Ti guido in 3 passaggi semplici. Ci vogliono circa 2 minuti e si fanno una volta sola.</p>
+    <div class="steps-list">
+      <div><b>1</b><span>Scrivi i tuoi dati, così chi ti soccorre sa chi sei</span></div>
+      <div><b>2</b><span>Scegli chi avvisare in caso di bisogno</span></div>
+      <div><b>3</b><span>Controlla la posizione e fai una prova</span></div>
+    </div>
+  </div>
+
+  <!-- Stato -->
+  <div class="ready todo" id="ready" data-show="main">
+    <span class="ready-dot"></span>
+    <div><span id="ready-title">Completa la configurazione</span><small id="ready-sub"></small></div>
+  </div>
+
+  <!-- Anagrafica -->
+  <div class="card" data-show="main,w2">
     <div class="card-title">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Configurazione
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      I tuoi dati
+    </div>
+    <p class="card-lead">Verranno inviati automaticamente a chi ti soccorre quando scatta l'allarme.</p>
+    <div class="grid2">
+      <div class="field">
+        <label for="id-nome">Nome</label>
+        <input type="text" id="id-nome" placeholder="Mario" autocomplete="given-name" autocapitalize="words"/>
+      </div>
+      <div class="field">
+        <label for="id-cognome">Cognome</label>
+        <input type="text" id="id-cognome" placeholder="Rossi" autocomplete="family-name" autocapitalize="words"/>
+      </div>
+    </div>
+    <div class="field">
+      <label for="id-cf">Codice fiscale</label>
+      <input type="text" id="id-cf" placeholder="RSSMRA80A01H501U" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false"/>
+      <div class="field-hint" id="cf-hint">16 caratteri, come sulla tessera sanitaria.</div>
+    </div>
+    <div class="grid2">
+      <div class="field">
+        <label for="id-nascita">Data di nascita <span class="opt">(facoltativo)</span></label>
+        <input type="date" id="id-nascita"/>
+      </div>
+      <div class="field">
+        <label for="id-sangue">Gruppo sanguigno <span class="opt">(facoltativo)</span></label>
+        <select id="id-sangue">
+          <option value="">Non indicato</option>
+          <option>0+</option><option>0-</option><option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option><option>AB+</option><option>AB-</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="id-indirizzo">Indirizzo di casa <span class="opt">(facoltativo)</span></label>
+      <input type="text" id="id-indirizzo" placeholder="Via Roma 1, Caiazzo (CE)" autocomplete="street-address"/>
+    </div>
+    <div class="field">
+      <label for="id-note">Allergie, patologie, farmaci <span class="opt">(facoltativo)</span></label>
+      <textarea id="id-note" placeholder="Es. allergico alla penicillina, diabete tipo 2"></textarea>
+      <div class="field-hint">Informazioni utili ai soccorritori. Scrivi solo ciò che vuoi condividere.</div>
+    </div>
+  </div>
+
+  <!-- Contatti -->
+  <div class="card" data-show="main,w3">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Chi avvisare
+    </div>
+    <p class="card-lead">Fino a 3 persone di fiducia. Basta il cellulare o l'email: meglio entrambi.</p>
+
+    <div class="contact">
+      <div class="contact-h">Contatto 1 <span>Principale</span></div>
+      <div class="field"><label for="c1-nome">Nome</label><input type="text" id="c1-nome" placeholder="Es. Anna (figlia)" autocapitalize="words"/></div>
+      <div class="field"><label for="c1-tel">Cellulare <span class="opt">(SMS e chiamata)</span></label><input type="tel" id="c1-tel" placeholder="+39 333 1234567" autocomplete="off"/></div>
+      <div class="field"><label for="c1-email">Email</label><input type="email" id="c1-email" placeholder="anna@gmail.com" autocomplete="off"/></div>
+    </div>
+    <div class="contact">
+      <div class="contact-h">Contatto 2 <span class="opt">Facoltativo</span></div>
+      <div class="field"><label for="c2-nome">Nome</label><input type="text" id="c2-nome" autocapitalize="words"/></div>
+      <div class="field"><label for="c2-tel">Cellulare</label><input type="tel" id="c2-tel" placeholder="+39 ..." autocomplete="off"/></div>
+      <div class="field"><label for="c2-email">Email</label><input type="email" id="c2-email" autocomplete="off"/></div>
+    </div>
+    <div class="contact">
+      <div class="contact-h">Contatto 3 <span class="opt">Facoltativo</span></div>
+      <div class="field"><label for="c3-nome">Nome</label><input type="text" id="c3-nome" autocapitalize="words"/></div>
+      <div class="field"><label for="c3-tel">Cellulare</label><input type="tel" id="c3-tel" placeholder="+39 ..." autocomplete="off"/></div>
+      <div class="field"><label for="c3-email">Email</label><input type="email" id="c3-email" autocomplete="off"/></div>
     </div>
 
     <div class="field">
-      <label>Email di emergenza (destinatario)</label>
-      <input type="email" id="cfg-email" placeholder="familiare@gmail.com" autocomplete="email"/>
-      <div class="field-hint">Chi riceverà l'email di allarme con le coordinate GPS.</div>
+      <label for="cfg-call">Chi chiamare in caso di allarme</label>
+      <select id="cfg-call">
+        <option value="1">Contatto 1</option>
+        <option value="2">Contatto 2</option>
+        <option value="3">Contatto 3</option>
+        <option value="112">112 Numero unico emergenze</option>
+      </select>
+      <div class="field-hint">L'SMS parte verso tutti i contatti con cellulare; l'email verso tutti quelli con email.</div>
     </div>
     <div class="field">
-      <label>Numero da chiamare</label>
-      <input type="tel" id="cfg-phone" placeholder="+393331234567" autocomplete="tel"/>
-      <div class="field-hint">Su mobile avvia la chiamata diretta. Su desktop apre il dialer.</div>
+      <label for="cfg-secs">Tempo per annullare (se premi per errore)</label>
+      <select id="cfg-secs">
+        <option value="5">5 secondi</option>
+        <option value="10" selected>10 secondi</option>
+        <option value="15">15 secondi</option>
+        <option value="30">30 secondi</option>
+      </select>
     </div>
-    <div class="field">
-      <label>Numero per SMS di emergenza</label>
-      <input type="tel" id="cfg-sms" placeholder="+393331234567" autocomplete="tel"/>
-      <div class="field-hint">Riceverà un SMS con coordinate GPS e link Maps. Funziona solo su mobile (iOS/Android).</div>
-    </div>
+  </div>
 
-    <hr class="sep"/>
-
-    <!-- GPS -->
+  <!-- GPS -->
+  <div class="card" data-show="main,w4">
     <div class="card-title">
       <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
       Posizione GPS
     </div>
+    <p class="card-lead" data-show="w4">Tocca il pulsante e, quando il telefono lo chiede, scegli "Consenti". Serve per mandare la tua posizione ai tuoi contatti.</p>
     <div class="gps-bar">
       <div class="gps-dot" id="gps-dot"></div>
       <span class="gps-text" id="gps-text">Posizione non ancora acquisita</span>
     </div>
-    <button class="btn-sm" onclick="getGPS()">
-      <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:var(--gray-600);stroke-width:2;fill:none"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
-      Acquisisci posizione
-    </button>
-    <p class="hint">Aggiornata automaticamente all'attivazione SOS.</p>
+    <button class="btn-sm" onclick="getGPS()">Acquisisci posizione ora</button>
+    <p class="hint">Si aggiorna da sola quando premi SOS.</p>
   </div>
 
-  <!-- Card: EmailJS -->
-  <div class="card">
+  <!-- Ultimo passo guida -->
+  <div class="card" data-show="w4">
+    <div class="card-title">Ultimo passo: fai una prova</div>
+    <p class="card-lead" style="margin-bottom:0">Premendo <b>Fine</b> vedrai il pulsante SOS. Sotto trovi la casella <b>Modalità prova</b>: spuntala, premi SOS e senti la sirena senza inviare nulla. Poi toglila.</p>
+  </div>
+
+  <!-- Avanzate: EmailJS -->
+  <div class="card" data-show="main">
     <button class="section-toggle" id="ejs-toggle" onclick="toggleEJS()">
-      <div class="card-title" style="margin-bottom:0">
+      <div class="card-title">
         <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Email automatica (EmailJS)
+        Invio email automatico (avanzato)
       </div>
       <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-
     <div class="collapsible" id="ejs-section">
-      <div style="padding-top:14px">
-
+      <div>
         <div class="ejs-status unconfigured" id="ejs-status">
           <span class="ejs-dot"></span>
-          <span id="ejs-status-text">Chiavi EmailJS non configurate — l'email aprirà il client di posta come fallback.</span>
+          <span id="ejs-status-text">Non configurato: l'email si aprirà nella tua app di posta.</span>
         </div>
-
-        <div class="field">
-          <label>Public Key</label>
-          <input type="text" id="ejs-pubkey" placeholder="es. AbCdEfGhIjKlMnOpQr" autocomplete="off"/>
-          <div class="field-hint">Account → API Keys su emailjs.com</div>
+        <p class="hint" style="margin:0 0 12px">Sezione per chi configura l'app (può farlo un familiare esperto una volta sola).</p>
+        <div class="field"><label for="ejs-pubkey">Public Key</label><input type="text" id="ejs-pubkey" placeholder="AbCdEfGhIjKlMnOpQr" autocomplete="off"/></div>
+        <div class="field"><label for="ejs-service">Service ID</label><input type="text" id="ejs-service" placeholder="service_xxxxxxx" autocomplete="off"/></div>
+        <div class="field"><label for="ejs-template">Template ID</label><input type="text" id="ejs-template" placeholder="template_xxxxxxx" autocomplete="off"/></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-sm" onclick="saveEJS()">Salva chiavi</button>
+          <button class="btn-test" onclick="testEmail()">Invia email di prova</button>
         </div>
-        <div class="field">
-          <label>Service ID</label>
-          <input type="text" id="ejs-service" placeholder="es. service_xxxxxxx" autocomplete="off"/>
-          <div class="field-hint">Email Services → seleziona il tuo servizio</div>
-        </div>
-        <div class="field">
-          <label>Template ID</label>
-          <input type="text" id="ejs-template" placeholder="es. template_xxxxxxx" autocomplete="off"/>
-          <div class="field-hint">Email Templates → seleziona il tuo template</div>
-        </div>
-
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-          <button class="btn-sm" onclick="saveEJS()">
-            <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;stroke-width:2;fill:none"><polyline points="20 6 9 17 4 12"/></svg>
-            Salva chiavi
-          </button>
-          <button class="btn-test" onclick="testEmail()">
-            <svg viewBox="0 0 24 24" width="13" height="13" style="stroke:currentColor;stroke-width:2;fill:none"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
-            Invia email di test
-          </button>
-        </div>
-
-        <a class="ejs-link" href="https://www.emailjs.com" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" width="11" height="11" style="stroke:currentColor;stroke-width:2;fill:none"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Apri emailjs.com per ottenere le chiavi (gratuito, 200 email/mese)
-        </a>
-
-        <div style="margin-top:10px;padding:10px 12px;background:var(--gray-50);border-radius:var(--radius-sm);font-size:11px;color:var(--gray-600);line-height:1.6">
-          <strong style="display:block;margin-bottom:4px;color:var(--gray-800)">Come configurare il template EmailJS:</strong>
-          Nel template usa queste variabili:<br/>
-          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{to_email}}</code> — destinatario &nbsp;
-          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{gps_coords}}</code> — coordinate<br/>
-          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{maps_link}}</code> — link Maps &nbsp;
-          <code style="background:var(--gray-100);padding:1px 4px;border-radius:3px;font-size:10.5px">{{datetime}}</code> — data e ora
+        <a class="ejs-link" href="https://www.emailjs.com" target="_blank" rel="noopener">Ottieni le chiavi su emailjs.com (gratis, 200 email/mese) →</a>
+        <div class="tpl-box">
+          <strong style="color:var(--gray-800)">Variabili da usare nel template EmailJS:</strong><br/>
+          <code>{{to_email}}</code> <code>{{contact_name}}</code> <code>{{full_name}}</code> <code>{{fiscal_code}}</code><br/>
+          <code>{{birth_date}}</code> <code>{{blood_group}}</code> <code>{{medical_notes}}</code> <code>{{address}}</code><br/>
+          <code>{{gps_coords}}</code> <code>{{maps_link}}</code> <code>{{datetime}}</code><br/>
+          Oppure solo <code>{{message}}</code>: contiene già tutto.
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Card: SOS -->
-  <div class="card">
+  <!-- SOS -->
+  <div class="card" data-show="main">
     <div class="sos-zone" id="sos-zone">
       <button class="sos-btn" id="sos-btn" onclick="startCountdown()" aria-label="Attiva allarme SOS">
         <span class="sos-word">SOS</span>
-        <span class="sos-sub">PREMI PER ATTIVARE</span>
+        <span class="sos-sub" id="sos-sub">PREMI PER ATTIVARE</span>
       </button>
     </div>
 
     <div class="cd-wrap" id="cd-wrap">
       <div class="cd-ring">
-        <svg viewBox="0 0 160 160" width="160" height="160">
+        <svg viewBox="0 0 160 160" width="170" height="170">
           <circle class="cd-bg" cx="80" cy="80" r="68"/>
           <circle class="cd-fill" id="cd-fill" cx="80" cy="80" r="68"/>
         </svg>
@@ -254,176 +369,315 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sy
         </div>
       </div>
       <br/>
-      <button class="btn-cancel" onclick="cancelCountdown()">
-        <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:var(--red);stroke-width:2.5;fill:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Annulla allarme
-      </button>
+      <button class="btn-cancel" onclick="cancelCountdown()">✕ Annulla allarme</button>
     </div>
 
     <div style="text-align:center">
-      <button class="btn-stop" id="btn-stop" onclick="stopSOS()">&#9632; Interrompi allarme</button>
+      <button class="btn-stop" id="btn-stop" onclick="stopSOS()">■ Interrompi allarme</button>
     </div>
 
+    <div class="actions" id="actions">
+      <button class="act call" onclick="actCall()">📞 Chiama</button>
+      <button class="act sms" onclick="actSMS()">💬 Invia SMS</button>
+      <button class="act mail" onclick="actMail()">📧 Invia email</button>
+      <button class="act share" onclick="actShare()">📍 Condividi</button>
+    </div>
+    <div class="actions-note" id="actions-note">Se qualcosa non è partito da solo, usa questi pulsanti.</div>
+
+    <label class="check"><input type="checkbox" id="cfg-test"/> Modalità prova (suona la sirena ma non invia nulla)</label>
+    <div class="testbanner" id="testbanner">MODALITÀ PROVA ATTIVA: non verrà inviato nulla. Togli la spunta per usare l'app davvero.</div>
     <div class="log" id="log"></div>
   </div>
 
+  <p class="privacy">I tuoi dati restano salvati solo su questo dispositivo. Vengono trasmessi soltanto al momento dell'allarme: l'email passa dal servizio EmailJS, SMS e chiamata dalla rete telefonica.</p>
+  <p class="disclaimer">In caso di pericolo immediato chiama sempre il 112. Questa app è un aiuto aggiuntivo e non sostituisce i servizi di emergenza.</p>
+  <button class="linkbtn" data-show="main" onclick="startWizard()">Rifai la configurazione guidata</button>
+
+</div>
+
+<!-- Barra guida -->
+<div class="wizbar" id="wizbar" style="display:none">
+  <div class="wizbar-in">
+    <div class="wiz-msg" id="wiz-msg"></div>
+    <div class="wiz-prog"><span id="wiz-label">Passo 1 di 4</span><div class="wiz-dots" id="wiz-dots"></div></div>
+    <div class="wiz-btns">
+      <button class="btn-sm" id="wiz-back" onclick="wizMove(-1)">Indietro</button>
+      <button class="wiz-next" id="wiz-next" onclick="wizMove(1)">Avanti</button>
+    </div>
+    <button class="wiz-skip" onclick="endWizard()">Salta la guida</button>
+  </div>
 </div>
 
 <script>
-const SECS = 10;
+let SECS = 10;
 const CIRC = 2 * Math.PI * 68;
 
 let gpsCoords = null;
-let audioCtx = null;
-let sirenOscs = [];
-let sosActive = false;
-let cdInterval = null;
-let cdLeft = SECS;
-let ejsReady = false;
+let audioCtx = null, sirenOsc = null, sirenTimer = null, wakeLock = null;
+let sosActive = false, cdInterval = null, cdLeft = SECS, ejsReady = false;
+let wiz = false, wizStep = 1;
+const WIZ_MAX = 4;
 
-/* ── Storage ── */
+const FIELDS = {
+  'cfg-call':'sos_call','cfg-secs':'sos_secs',
+  'id-nome':'sos_nome','id-cognome':'sos_cognome','id-cf':'sos_cf','id-nascita':'sos_nascita',
+  'id-sangue':'sos_sangue','id-indirizzo':'sos_indirizzo','id-note':'sos_note'
+};
+[1,2,3].forEach(i => ['nome','tel','email'].forEach(f => { FIELDS[`c${i}-${f}`] = `c${i}_${f}`; }));
+const SELECTS = ['cfg-call','cfg-secs','id-sangue'];
+
+const $ = id => document.getElementById(id);
+const val = id => ($(id).value || '').trim();
+
 function save(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
 function load(k) { try { return localStorage.getItem(k) || ''; } catch(e) { return ''; } }
 
 function loadConfig() {
-  document.getElementById('cfg-email').value    = load('sos_email');
-  document.getElementById('cfg-phone').value    = load('sos_phone');
-  document.getElementById('cfg-sms').value      = load('sos_sms');
-  document.getElementById('ejs-pubkey').value   = load('ejs_pubkey');
-  document.getElementById('ejs-service').value  = load('ejs_service');
-  document.getElementById('ejs-template').value = load('ejs_template');
+  /* Migrazione dalla v3.0: un solo contatto → Contatto 1 */
+  if (!load('c1_tel') && !load('c1_email') && (load('sos_sms') || load('sos_phone') || load('sos_email'))) {
+    save('c1_tel', load('sos_sms') || load('sos_phone'));
+    save('c1_email', load('sos_email'));
+  }
+  if (load('sos_nome') || load('c1_tel') || load('c1_email')) save('sos_wizard', '1');
+
+  Object.entries(FIELDS).forEach(([id, key]) => {
+    const v = load(key);
+    if (v) $(id).value = v;
+    $(id).addEventListener(SELECTS.includes(id) ? 'change' : 'input', () => {
+      if (id === 'id-cf') $(id).value = $(id).value.toUpperCase().replace(/\s/g, '');
+      save(key, $(id).value.trim());
+      if (id === 'id-cf') checkCF();
+      updateReady();
+    });
+  });
+  $('ejs-pubkey').value   = load('ejs_pubkey');
+  $('ejs-service').value  = load('ejs_service');
+  $('ejs-template').value = load('ejs_template');
+  $('cfg-test').addEventListener('change', updateTestUI);
+  SECS = parseInt(val('cfg-secs')) || 10;
+  checkCF();
   initEJS();
+  updateReady();
+  if (!load('sos_wizard')) startWizard(); else renderView();
 }
 
-['cfg-email','cfg-phone','cfg-sms'].forEach(id => {
-  document.getElementById(id).addEventListener('change', () => {
-    save('sos_' + id.replace('cfg-',''), document.getElementById(id).value);
+/* ── Contatti ── */
+function getContacts() {
+  return [1,2,3].map(i => ({
+    n: i, nome: val(`c${i}-nome`), tel: val(`c${i}-tel`).replace(/[\s\-()]/g, ''), email: val(`c${i}-email`)
+  })).filter(c => c.tel || c.email);
+}
+const smsList = () => getContacts().filter(c => c.tel).map(c => c.tel);
+const mailList = () => getContacts().filter(c => c.email).map(c => c.email);
+function callNumber() {
+  const sel = val('cfg-call');
+  if (sel === '112') return '112';
+  const c = getContacts().find(x => String(x.n) === sel && x.tel) || getContacts().find(x => x.tel);
+  return c ? c.tel : '';
+}
+const testMode = () => $('cfg-test').checked;
+function updateTestUI() {
+  const t = testMode();
+  $('testbanner').classList.toggle('on', t);
+  $('sos-btn').classList.toggle('test', t);
+  $('sos-sub').textContent = t ? 'PROVA (NON INVIA)' : 'PREMI PER ATTIVARE';
+}
+
+/* ── Codice fiscale ── */
+function cfValid(cf) {
+  cf = cf.toUpperCase();
+  if (!/^[A-Z0-9]{16}$/.test(cf)) return false;
+  const oddD = [1,0,5,7,9,13,15,17,19,21];
+  const oddL = [1,0,5,7,9,13,15,17,19,21,2,4,18,20,11,3,6,8,12,14,16,10,22,25,24,23];
+  let s = 0;
+  for (let i = 0; i < 15; i++) {
+    const c = cf[i], isL = c >= 'A' && c <= 'Z';
+    const idx = isL ? c.charCodeAt(0) - 65 : parseInt(c, 10);
+    s += (i % 2 === 0) ? (isL ? oddL[idx] : oddD[idx]) : idx;
+  }
+  return String.fromCharCode(65 + (s % 26)) === cf[15];
+}
+function checkCF() {
+  const cf = val('id-cf'), h = $('cf-hint'), inp = $('id-cf');
+  inp.classList.remove('bad'); h.className = 'field-hint';
+  if (!cf) { h.textContent = '16 caratteri, come sulla tessera sanitaria.'; return; }
+  if (cf.length < 16) { h.textContent = `Mancano ${16 - cf.length} caratteri.`; return; }
+  if (cfValid(cf)) { h.textContent = 'Codice fiscale formalmente corretto ✓'; h.classList.add('good'); }
+  else { h.textContent = 'Il codice non sembra corretto: ricontrolla.'; h.classList.add('bad'); inp.classList.add('bad'); }
+}
+
+/* ── Anagrafica → testo ── */
+function fmtDate(iso) { if (!iso) return ''; const [y,m,d] = iso.split('-'); return `${d}/${m}/${y}`; }
+function getAnag() {
+  return {
+    nome: val('id-nome'), cognome: val('id-cognome'), cf: val('id-cf').toUpperCase(),
+    nascita: fmtDate(val('id-nascita')), sangue: val('id-sangue'),
+    indirizzo: val('id-indirizzo'), note: val('id-note')
+  };
+}
+function anagLines(short) {
+  const a = getAnag(), L = [];
+  const full = `${a.nome} ${a.cognome}`.trim();
+  if (full) L.push(`Nome: ${full}`);
+  if (a.cf) L.push(`CF: ${a.cf}`);
+  if (a.nascita) L.push(`Nato/a il: ${a.nascita}`);
+  if (a.sangue) L.push(`Gruppo sanguigno: ${a.sangue}`);
+  if (a.indirizzo && !short) L.push(`Indirizzo: ${a.indirizzo}`);
+  if (a.note) L.push(`Note mediche: ${short && a.note.length > 80 ? a.note.slice(0, 77) + '…' : a.note}`);
+  return L;
+}
+
+/* ── Stato configurazione ── */
+function updateReady() {
+  const missing = [], a = getAnag();
+  if (!a.nome || !a.cognome) missing.push('nome e cognome');
+  if (!getContacts().length) missing.push('almeno un contatto');
+  const el = $('ready');
+  if (missing.length) {
+    el.className = 'ready todo';
+    $('ready-title').textContent = 'Completa la configurazione';
+    $('ready-sub').textContent = 'Manca: ' + missing.join(' e ');
+  } else {
+    const n = getContacts().length;
+    el.className = 'ready ok';
+    $('ready-title').textContent = 'Tutto pronto';
+    $('ready-sub').textContent = `${n} contatt${n === 1 ? 'o' : 'i'} configurat${n === 1 ? 'o' : 'i'}` + (a.cf && cfValid(a.cf) ? '' : ' · consigliato: codice fiscale valido');
+  }
+}
+
+/* ── Procedura guidata ── */
+function renderView() {
+  document.body.classList.toggle('wizard', wiz);
+  document.querySelectorAll('[data-show]').forEach(el => {
+    const t = el.dataset.show.split(',');
+    el.style.display = (wiz ? t.includes('w' + wizStep) : t.includes('main')) ? '' : 'none';
   });
-});
+  $('wizbar').style.display = wiz ? '' : 'none';
+  if (wiz) {
+    $('wiz-label').textContent = `Passo ${wizStep} di ${WIZ_MAX}`;
+    $('wiz-dots').innerHTML = Array.from({length: WIZ_MAX}, (_, i) => `<i class="${i < wizStep ? 'on' : ''}"></i>`).join('');
+    $('wiz-back').style.visibility = wizStep === 1 ? 'hidden' : 'visible';
+    $('wiz-next').textContent = wizStep === 1 ? 'Iniziamo' : (wizStep === WIZ_MAX ? 'Fine' : 'Avanti');
+    $('wiz-msg').classList.remove('on');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function startWizard() { wiz = true; wizStep = 1; renderView(); }
+function endWizard() { wiz = false; save('sos_wizard', '1'); renderView(); updateReady(); }
+function wizMove(d) {
+  const msg = $('wiz-msg');
+  if (d > 0) {
+    let err = '';
+    if (wizStep === 2 && (!val('id-nome') || !val('id-cognome'))) err = 'Scrivi almeno nome e cognome per continuare.';
+    if (wizStep === 3 && !getContacts().length) err = 'Inserisci almeno un cellulare o un\'email del Contatto 1.';
+    if (err) { msg.textContent = err; msg.classList.add('on'); return; }
+    if (wizStep === WIZ_MAX) { endWizard(); return; }
+  }
+  wizStep = Math.min(WIZ_MAX, Math.max(1, wizStep + d));
+  renderView();
+}
 
 /* ── EmailJS ── */
 function initEJS() {
-  const pk  = document.getElementById('ejs-pubkey').value.trim();
-  const svc = document.getElementById('ejs-service').value.trim();
-  const tpl = document.getElementById('ejs-template').value.trim();
-  const st  = document.getElementById('ejs-status');
-  const stxt = document.getElementById('ejs-status-text');
-
+  const pk = val('ejs-pubkey'), svc = val('ejs-service'), tpl = val('ejs-template');
+  const st = $('ejs-status'), stxt = $('ejs-status-text');
   if (pk && svc && tpl) {
     try {
       emailjs.init({ publicKey: pk });
       ejsReady = true;
       st.className = 'ejs-status configured';
-      stxt.textContent = 'EmailJS configurato — email inviate automaticamente in background.';
+      stxt.textContent = 'Configurato: l\'email parte da sola in background.';
     } catch(e) {
       ejsReady = false;
       st.className = 'ejs-status error';
-      stxt.textContent = 'Errore inizializzazione EmailJS: ' + e.message;
+      stxt.textContent = 'Errore EmailJS (sei online?): ' + e.message;
     }
   } else {
     ejsReady = false;
     st.className = 'ejs-status unconfigured';
-    stxt.textContent = 'Chiavi EmailJS non configurate — l\'email aprirà il client di posta come fallback.';
+    stxt.textContent = 'Non configurato: l\'email si aprirà nella tua app di posta.';
   }
 }
-
 function saveEJS() {
-  save('ejs_pubkey',   document.getElementById('ejs-pubkey').value.trim());
-  save('ejs_service',  document.getElementById('ejs-service').value.trim());
-  save('ejs_template', document.getElementById('ejs-template').value.trim());
+  save('ejs_pubkey', val('ejs-pubkey')); save('ejs_service', val('ejs-service')); save('ejs_template', val('ejs-template'));
   initEJS();
-  log(ejsReady ? 'Chiavi EmailJS salvate e attive.' : 'Chiavi salvate ma incomplete — controlla i campi.', ejsReady ? 'ok' : 'warn');
+  log(ejsReady ? 'Chiavi EmailJS salvate e attive.' : 'Chiavi incomplete: controlla i campi.', ejsReady ? 'ok' : 'warn');
 }
-
-async function sendViaEmailJS(coords) {
-  const svc = document.getElementById('ejs-service').value.trim();
-  const tpl = document.getElementById('ejs-template').value.trim();
-  const toEmail = document.getElementById('cfg-email').value.trim();
-
-  const mapsLink = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
-  const gpsStr   = coords ? `${coords.lat}, ${coords.lng} (±${coords.acc}m)` : 'Non disponibile';
-  const dt       = new Date().toLocaleString('it-IT');
-
-  const params = {
-    to_email:   toEmail,
-    gps_coords: gpsStr,
-    maps_link:  mapsLink,
-    datetime:   dt,
-    message:    `ALLARME EMERGENZA\nData: ${dt}\nGPS: ${gpsStr}\nMaps: ${mapsLink}`
-  };
-
-  await emailjs.send(svc, tpl, params);
+function buildEmailText(coords) {
+  const dt = new Date().toLocaleString('it-IT');
+  const maps = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
+  const gps = coords ? `${coords.lat}, ${coords.lng} (precisione ±${coords.acc} m)` : 'Non disponibile';
+  return `ALLARME DI EMERGENZA\n\nData e ora: ${dt}\n\n${anagLines(false).join('\n') || 'Dati anagrafici non compilati'}\n\nCoordinate GPS: ${gps}\nGoogle Maps: ${maps}\n\nMessaggio inviato dall'app SOS Emergenza.`;
 }
-
+async function sendViaEmailJS(coords, contact) {
+  const a = getAnag();
+  const maps = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
+  const gps = coords ? `${coords.lat}, ${coords.lng} (±${coords.acc}m)` : 'Non disponibile';
+  await emailjs.send(val('ejs-service'), val('ejs-template'), {
+    to_email: contact.email, contact_name: contact.nome,
+    full_name: `${a.nome} ${a.cognome}`.trim(),
+    fiscal_code: a.cf, birth_date: a.nascita, blood_group: a.sangue,
+    medical_notes: a.note, address: a.indirizzo,
+    gps_coords: gps, maps_link: maps, datetime: new Date().toLocaleString('it-IT'),
+    message: buildEmailText(coords)
+  });
+}
 async function testEmail() {
-  const toEmail = document.getElementById('cfg-email').value.trim();
-  if (!toEmail) { log('Inserisci prima l\'email di emergenza.', 'warn'); return; }
+  const c = getContacts().find(x => x.email);
+  if (!c) { log('Inserisci prima l\'email di almeno un contatto.', 'warn'); return; }
   if (!ejsReady) { log('Configura prima le chiavi EmailJS.', 'warn'); return; }
-  log('Invio email di test…', 'info');
-  try {
-    await sendViaEmailJS(gpsCoords);
-    log('Email di test inviata con successo!', 'ok');
-  } catch(e) {
-    log('Errore invio test: ' + (e.text || e.message || JSON.stringify(e)), 'err');
-  }
+  log(`Invio email di prova a ${c.email}…`, 'info');
+  try { await sendViaEmailJS(gpsCoords, c); log('Email di prova inviata!', 'ok'); }
+  catch(e) { log('Errore invio: ' + (e.text || e.message || JSON.stringify(e)), 'err'); }
 }
-
-function toggleEJS() {
-  const btn = document.getElementById('ejs-toggle');
-  const sec = document.getElementById('ejs-section');
-  btn.classList.toggle('open');
-  sec.classList.toggle('open');
-}
+function toggleEJS() { $('ejs-toggle').classList.toggle('open'); $('ejs-section').classList.toggle('open'); }
 
 /* ── GPS ── */
+function setGPS(pos) {
+  gpsCoords = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
+  $('gps-dot').className = 'gps-dot ok';
+  $('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc} m)`;
+}
 function getGPS() {
   if (!navigator.geolocation) { gpsErr('GPS non supportato'); return; }
-  const dot = document.getElementById('gps-dot');
-  dot.className = 'gps-dot spin';
-  document.getElementById('gps-text').textContent = 'Acquisizione in corso…';
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      gpsCoords = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
-      dot.className = 'gps-dot ok';
-      document.getElementById('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc}m)`;
-    },
-    () => gpsErr('Permesso negato o timeout. Riprova.'),
-    { enableHighAccuracy: true, timeout: 12000 }
-  );
+  $('gps-dot').className = 'gps-dot spin';
+  $('gps-text').textContent = 'Acquisizione in corso…';
+  navigator.geolocation.getCurrentPosition(setGPS, () => gpsErr('Permesso negato o timeout. Riprova.'), { enableHighAccuracy: true, timeout: 12000 });
 }
-function gpsErr(msg) {
-  document.getElementById('gps-dot').className = 'gps-dot err';
-  document.getElementById('gps-text').textContent = msg;
-}
+function gpsErr(msg) { $('gps-dot').className = 'gps-dot err'; $('gps-text').textContent = msg; }
 
 /* ── Log ── */
 const ICONS = {
-  info:   '<path d="M12 16v-4M12 8h.01"/><circle cx="12" cy="12" r="10"/>',
-  ok:     '<polyline points="20 6 9 17 4 12"/>',
-  warn:   '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/>',
-  err:    '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
-  purple: '<path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>'
+  info:'<path d="M12 16v-4M12 8h.01"/><circle cx="12" cy="12" r="10"/>',
+  ok:'<polyline points="20 6 9 17 4 12"/>',
+  warn:'<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/>',
+  err:'<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+  purple:'<path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/>'
 };
-function log(msg, type='info') {
-  const c = document.getElementById('log');
+function log(msg, type = 'info') {
   const d = document.createElement('div');
   d.className = `log-item log-${type}`;
-  d.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[type]||ICONS.info}</svg><span>${msg}</span>`;
-  c.prepend(d);
+  d.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[type] || ICONS.info}</svg>`;
+  const s = document.createElement('span'); s.textContent = msg; d.appendChild(s);
+  $('log').prepend(d);
 }
-
-/* ── Ring ── */
 function setRing(frac) {
-  const el = document.getElementById('cd-fill');
+  const el = $('cd-fill');
   el.style.strokeDasharray = CIRC;
   el.style.strokeDashoffset = CIRC * (1 - frac);
 }
 
 /* ── Audio ── */
+function ensureAudioCtx() {
+  try {
+    if (!audioCtx || audioCtx.state === 'closed') audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  } catch(e) {}
+  return audioCtx;
+}
 function beep(freq, dur) {
   try {
-    const ctx = ensureAudioCtx();
-    const o = ctx.createOscillator(), g = ctx.createGain();
+    const ctx = ensureAudioCtx(), o = ctx.createOscillator(), g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination);
     o.type = 'sine'; o.frequency.value = freq;
     g.gain.setValueAtTime(0.22, ctx.currentTime);
@@ -431,111 +685,109 @@ function beep(freq, dur) {
     o.start(); o.stop(ctx.currentTime + dur + 0.02);
   } catch(e) {}
 }
-
-/* Crea/riusa AudioContext nel gestore del tocco utente — fix policy autoplay Android/Chrome */
-function ensureAudioCtx() {
-  try {
-    if (!audioCtx || audioCtx.state === 'closed') {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-  } catch(e) {}
-  return audioCtx;
-}
-
 function startSiren() {
   try {
     const ctx = ensureAudioCtx();
-    sirenOscs = [];
-    for (let i = 0; i < 30; i++) {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.type = 'sawtooth';
-      const t = ctx.currentTime + i * 0.6;
-      o.frequency.setValueAtTime(400, t);
-      o.frequency.linearRampToValueAtTime(700, t + 0.3);
-      o.frequency.linearRampToValueAtTime(400, t + 0.58);
-      g.gain.setValueAtTime(0.28, t);
-      g.gain.linearRampToValueAtTime(0, t + 0.55);
-      o.start(t); o.stop(t + 0.6);
-      sirenOscs.push(o);
-    }
+    sirenOsc = ctx.createOscillator();
+    const g = ctx.createGain();
+    sirenOsc.type = 'sawtooth'; g.gain.value = 0.3;
+    sirenOsc.connect(g); g.connect(ctx.destination);
+    sirenOsc.start();
+    let up = true;
+    const sweep = () => {
+      const t = ctx.currentTime, f = sirenOsc.frequency;
+      f.cancelScheduledValues(t);
+      f.setValueAtTime(up ? 400 : 700, t);
+      f.linearRampToValueAtTime(up ? 700 : 400, t + 0.5);
+      up = !up;
+    };
+    sweep(); sirenTimer = setInterval(sweep, 500);
   } catch(e) {}
 }
-
 function stopSiren() {
-  sirenOscs.forEach(o => { try { o.stop(); } catch(e) {} });
-  sirenOscs = [];
+  if (sirenTimer) { clearInterval(sirenTimer); sirenTimer = null; }
+  if (sirenOsc) { try { sirenOsc.stop(); } catch(e) {} sirenOsc = null; }
   if (audioCtx) { try { audioCtx.close(); } catch(e) {} audioCtx = null; }
 }
+async function lockScreen() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
+function unlockScreen() { try { if (wakeLock) wakeLock.release(); } catch(e) {} wakeLock = null; }
 
 /* ── Countdown ── */
 function startCountdown() {
-  const email = document.getElementById('cfg-email').value.trim();
-  const phone = document.getElementById('cfg-phone').value.trim();
-  const sms   = document.getElementById('cfg-sms').value.trim();
-  if (!email && !phone && !sms) { log('Configura almeno un\'email, SMS o numero di telefono.', 'warn'); return; }
-  /* Inizializza AudioContext subito nel gestore del tocco — sblocca audio su Android/Chrome */
+  if (!getContacts().length) { log('Inserisci almeno un contatto da avvisare (cellulare o email).', 'warn'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const a = getAnag();
+  if (!a.nome || !a.cognome) log('Consiglio: compila nome e cognome, così chi riceve l\'allarme sa chi sei.', 'warn');
   ensureAudioCtx();
-
-  document.getElementById('log').innerHTML = '';
-  document.getElementById('sos-zone').style.display = 'none';
-  document.getElementById('cd-wrap').classList.add('on');
+  SECS = parseInt(val('cfg-secs')) || 10;
+  $('log').innerHTML = '';
+  $('sos-zone').style.display = 'none';
+  $('cd-wrap').classList.add('on');
   cdLeft = SECS;
-  document.getElementById('cd-num').textContent = SECS;
+  $('cd-num').textContent = SECS;
   setRing(1);
-  log(`Allarme tra ${SECS} secondi. Premi "Annulla" per fermare.`, 'warn');
-
+  log(`Allarme tra ${SECS} secondi. Premi "Annulla" se è un errore.`, 'warn');
   cdInterval = setInterval(() => {
     cdLeft--;
-    document.getElementById('cd-num').textContent = cdLeft;
+    $('cd-num').textContent = cdLeft;
     setRing(cdLeft / SECS);
     beep(cdLeft <= 3 ? 900 : 520, 0.15);
     if (cdLeft <= 0) {
       clearInterval(cdInterval); cdInterval = null;
-      document.getElementById('cd-wrap').classList.remove('on');
-      document.getElementById('sos-zone').style.display = '';
+      $('cd-wrap').classList.remove('on');
+      $('sos-zone').style.display = '';
       triggerSOS();
     }
   }, 1000);
 }
-
 function cancelCountdown() {
   if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
-  document.getElementById('cd-wrap').classList.remove('on');
-  document.getElementById('sos-zone').style.display = '';
-  log('Allarme annullato prima dell\'invio.', 'warn');
+  $('cd-wrap').classList.remove('on');
+  $('sos-zone').style.display = '';
+  stopSiren();
+  log('Allarme annullato: non è stato inviato nulla.', 'warn');
 }
 
-/* ── SMS ── */
+/* ── Azioni (anche come pulsanti manuali di riserva) ── */
 function buildSMSText(coords) {
-  const dt = new Date().toLocaleString('it-IT');
-  const mapsLink = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : null;
-  const gpsStr   = coords ? `${coords.lat},${coords.lng} (±${coords.acc}m)` : 'GPS N/D';
-  let txt = `🚨 ALLARME EMERGENZA\nOra: ${dt}\nGPS: ${gpsStr}`;
-  if (mapsLink) txt += `\nMaps: ${mapsLink}`;
-  txt += `\n— App SOS Emergenza`;
-  return txt;
+  const maps = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : '';
+  const gps = coords ? `${coords.lat},${coords.lng} (±${coords.acc}m)` : 'GPS non disponibile';
+  return `🚨 ALLARME EMERGENZA\n${anagLines(true).join('\n')}\nOra: ${new Date().toLocaleString('it-IT')}\nGPS: ${gps}${maps ? '\nMappa: ' + maps : ''}`;
 }
-
-function sendSMS(smsNumber, coords) {
-  const body = encodeURIComponent(buildSMSText(coords));
-  /* sms: con corpo funziona su iOS (?&body=) e Android (?body=) */
+function actSMS() {
+  const list = smsList(); if (!list.length) { log('Nessun cellulare configurato per l\'SMS.', 'warn'); return; }
   const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
-  window.location.href = `sms:${smsNumber}${sep}body=${body}`;
+  window.location.href = `sms:${list.join(',')}${sep}body=${encodeURIComponent(buildSMSText(gpsCoords))}`;
+}
+function actCall() {
+  const n = callNumber(); if (!n) { log('Nessun numero da chiamare configurato.', 'warn'); return; }
+  window.location.href = `tel:${n}`;
+}
+function actMail() {
+  const list = mailList(); if (!list.length) { log('Nessuna email configurata.', 'warn'); return; }
+  window.location.href = `mailto:${list.join(',')}?subject=${encodeURIComponent('ALLARME EMERGENZA - richiesta soccorso')}&body=${encodeURIComponent(buildEmailText(gpsCoords))}`;
+}
+async function actShare() {
+  const text = buildSMSText(gpsCoords);
+  try {
+    if (navigator.share) await navigator.share({ title: 'ALLARME EMERGENZA', text });
+    else { await navigator.clipboard.writeText(text); log('Messaggio copiato: incollalo in WhatsApp o altra app.', 'ok'); }
+  } catch(e) {}
 }
 
 /* ── SOS principale ── */
 async function triggerSOS() {
   sosActive = true;
-  const email = document.getElementById('cfg-email').value.trim();
-  const phone  = document.getElementById('cfg-phone').value.trim();
-  const sms    = document.getElementById('cfg-sms').value.trim();
+  const test = testMode();
+  const mails = getContacts().filter(c => c.email);
+  const hasSms = smsList().length > 0, callNum = callNumber();
 
-  document.getElementById('sos-btn').classList.add('pulsing');
-  document.getElementById('btn-stop').classList.add('on');
+  $('sos-btn').classList.add('pulsing');
+  $('btn-stop').classList.add('on');
+  $('actions').classList.add('on'); $('actions-note').classList.add('on');
+  lockScreen();
+  try { navigator.vibrate && navigator.vibrate(Array(30).fill([500, 250]).flat()); } catch(e) {}
 
-  log('🚨 Allarme SOS attivato!', 'err');
+  log(test ? '🧪 PROVA: allarme simulato, non viene inviato nulla.' : '🚨 Allarme SOS attivato!', test ? 'info' : 'err');
   startSiren();
   log('Sirena attivata.', 'info');
   log('Acquisizione posizione GPS…', 'info');
@@ -543,82 +795,62 @@ async function triggerSOS() {
   await new Promise(resolve => {
     if (!navigator.geolocation) { log('GPS non supportato.', 'warn'); resolve(); return; }
     navigator.geolocation.getCurrentPosition(
-      pos => {
-        gpsCoords = { lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6), acc: Math.round(pos.coords.accuracy) };
-        document.getElementById('gps-dot').className = 'gps-dot ok';
-        document.getElementById('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc}m)`;
-        log(`Posizione: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc}m)`, 'ok');
-        resolve();
-      },
-      () => { log('GPS non disponibile. Procedo senza coordinate.', 'warn'); resolve(); },
+      pos => { setGPS(pos); log(`Posizione: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc} m)`, 'ok'); resolve(); },
+      () => { log('GPS non disponibile: procedo senza coordinate.', 'warn'); resolve(); },
       { enableHighAccuracy: true, timeout: 7000 }
     );
   });
 
-  /* ── EMAIL ── */
-  if (email) {
+  if (test) {
+    log('Prova completata. L\'allarme si ferma tra 4 secondi.', 'ok');
+    setTimeout(() => { if (sosActive) stopSOS(); }, 4000);
+    return;
+  }
+
+  const a = getAnag();
+  if (a.nome || a.cf) log(`Dati anagrafici inclusi: ${anagLines(true).slice(0, 2).join(' · ')}`, 'info');
+
+  /* EMAIL a tutti i contatti con email */
+  if (mails.length) {
     if (ejsReady) {
-      /* Invio automatico via EmailJS — nessun client di posta */
-      log('Invio email automatica via EmailJS…', 'purple');
-      try {
-        await sendViaEmailJS(gpsCoords);
-        log('✅ Email inviata automaticamente!', 'ok');
-      } catch(e) {
-        log('EmailJS fallito (' + (e.text || e.message || 'errore') + '). Apro client di posta…', 'warn');
-        _openMailto(email);
+      log(`Invio email automatica a ${mails.length} contatt${mails.length === 1 ? 'o' : 'i'}…`, 'purple');
+      let okN = 0;
+      for (const c of mails) {
+        try { await sendViaEmailJS(gpsCoords, c); okN++; }
+        catch(e) { log(`Email a ${c.nome || c.email} non inviata (${e.text || e.message || 'errore'}).`, 'warn'); }
       }
+      if (okN) log(`Email inviate: ${okN} su ${mails.length}.`, 'ok');
+      if (okN < mails.length) log('Per le email mancanti usa il tasto "Invia email".', 'warn');
     } else {
-      /* Fallback: client di posta */
-      log('EmailJS non configurato — apertura client di posta…', 'warn');
-      setTimeout(() => _openMailto(email), 400);
+      log('Invio automatico email non attivo: usa il tasto "Invia email".', 'warn');
     }
   }
 
-  /* ── SMS ── */
-  if (sms) {
-    const smsDelay = email ? 2400 : 400;
-    setTimeout(() => {
-      log(`Invio SMS verso ${sms}…`, 'info');
-      sendSMS(sms, gpsCoords);
-      log('SMS con coordinate GPS inviato.', 'ok');
-    }, smsDelay);
+  /* SMS a tutti: si apre già scritto, va confermato con "Invia" */
+  if (hasSms) {
+    setTimeout(() => { log('SMS pronto per tutti i contatti: premi "Invia" nell\'app Messaggi.', 'info'); actSMS(); }, mails.length ? 1200 : 400);
   }
-
-  /* ── CHIAMATA ── */
-  if (phone) {
-    const callDelay = (email && sms) ? 5000 : (email || sms) ? 3000 : 400;
-    setTimeout(() => {
-      log(`Avvio chiamata verso ${phone}…`, 'info');
-      window.location.href = `tel:${phone}`;
-    }, callDelay);
+  /* CHIAMATA */
+  if (callNum) {
+    const d = hasSms ? 6000 : (mails.length ? 1500 : 400);
+    setTimeout(() => { if (sosActive) { log(`Avvio chiamata verso ${callNum}…`, 'info'); actCall(); } }, d);
   }
-}
-
-function _openMailto(email) {
-  const coords = gpsCoords;
-  const mapsLink = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
-  const gpsStr   = coords ? `${coords.lat}, ${coords.lng} (precisione +/-${coords.acc}m)` : 'Non disponibile';
-  const dt       = new Date().toLocaleString('it-IT');
-  const body = `ALLARME DI EMERGENZA\n\nData e ora: ${dt}\n\nCoordinate GPS: ${gpsStr}\nGoogle Maps: ${mapsLink}\n\nQuesto messaggio e' stato inviato automaticamente dall'app SOS Emergenza.`;
-  window.location.href = `mailto:${email}?subject=${encodeURIComponent('ALLARME EMERGENZA - richiesta soccorso')}&body=${encodeURIComponent(body)}`;
-  log('Email aperta nel client di posta.', 'ok');
 }
 
 function stopSOS() {
   sosActive = false;
-  stopSiren();
-  document.getElementById('sos-btn').classList.remove('pulsing');
-  document.getElementById('btn-stop').classList.remove('on');
+  stopSiren(); unlockScreen();
+  try { navigator.vibrate && navigator.vibrate(0); } catch(e) {}
+  $('sos-btn').classList.remove('pulsing');
+  $('btn-stop').classList.remove('on');
+  $('actions').classList.remove('on'); $('actions-note').classList.remove('on');
   log('Allarme interrotto.', 'warn');
 }
 
-/* ── Init ── */
 loadConfig();
 
-/* ── Service Worker PWA ── */
-if ('serviceWorker' in navigator) {
-  const sw = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' }))).catch(()=>{});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>
 </body>
