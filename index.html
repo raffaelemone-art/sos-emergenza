@@ -9,10 +9,10 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="SOS Emergenza"/>
-<title>SOS Emergenza</title>
 <link rel="manifest" href="manifest.json"/>
 <link rel="icon" href="icon.svg" type="image/svg+xml"/>
 <link rel="apple-touch-icon" href="icon-192.png"/>
+<title>SOS Emergenza</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root{
@@ -107,7 +107,24 @@ body.wizard{padding-bottom:150px}
 .testbanner{display:none;margin-top:12px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--amber-bg);color:var(--amber);font-size:13px;font-weight:600;text-align:center;border:1px solid #fde68a}
 .testbanner.on{display:block}
 
-.sos-zone{text-align:center;padding:1.25rem 0 .75rem}
+.sos-zone{text-align:center;padding:.75rem 0 .5rem}
+.ev-list{display:flex;flex-direction:column;gap:12px}
+.ev-btn{position:relative;overflow:hidden;width:100%;min-height:92px;border:none;border-radius:18px;background:var(--red);color:#fff;cursor:pointer;display:flex;align-items:center;gap:14px;padding:12px 18px;text-align:left;font-family:inherit;outline:none;-webkit-appearance:none;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .1s}
+.ev-btn[data-type=furto]{background:#DC2626}
+.ev-btn[data-type=aggressione]{background:#9F1239}
+.ev-btn[data-type=malore]{background:#C2410C}
+.ev-btn::before{content:"";position:absolute;left:0;top:0;bottom:0;width:calc(var(--p,0) * 100%);background:rgba(0,0,0,.38);pointer-events:none}
+.ev-btn>*{position:relative}
+.ev-btn.holding{transform:scale(.98)}
+.ev-btn.ready{outline:4px solid #fff;outline-offset:-4px}
+.ev-btn.test{background:#d97706}
+.ev-btn.pulsing{animation:evPulse 1.2s ease-in-out infinite}
+@keyframes evPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.5)}50%{box-shadow:0 0 0 14px rgba(220,38,38,0)}}
+.ev-ico{font-size:38px;line-height:1}
+.ev-txt{display:flex;flex-direction:column;gap:3px}
+.ev-btn[data-type=malore] .ev-name{font-size:20px}
+.ev-name{font-size:24px;font-weight:800;letter-spacing:1px;line-height:1.05}
+.ev-sub{font-size:12px;letter-spacing:.5px;opacity:.92;font-weight:600}
 .sos-btn{width:180px;height:180px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 0 0 0 var(--red-ring),0 4px 16px rgba(220,38,38,.35);transition:transform .1s;outline:none;-webkit-appearance:none;font-family:inherit}
 .sos-btn:active{transform:scale(.96)}
 .sos-btn.test{background:#d97706}
@@ -116,6 +133,14 @@ body.wizard{padding-bottom:150px}
 .sos-word{font-size:36px;font-weight:800;letter-spacing:3px;line-height:1}
 .sos-sub{font-size:11px;letter-spacing:1px;opacity:.9;font-weight:600}
 
+.sos-wrap{position:relative;width:200px;height:200px;display:inline-flex;align-items:center;justify-content:center}
+.hold-ring{position:absolute;inset:0;width:200px;height:200px;transform:rotate(-90deg);pointer-events:none}
+.hold-ring circle{fill:none;stroke-width:6}
+.hold-bg{stroke:var(--gray-200)}
+.hold-fill{stroke:var(--red-dark);stroke-linecap:round;stroke-dasharray:590.6;stroke-dashoffset:590.6}
+.sos-btn{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sos-btn.holding{transform:scale(.96)}
+.sos-btn.ready{background:var(--red-dark)}
 .cd-wrap{display:none;text-align:center;padding:1.25rem 0 .75rem}
 .cd-wrap.on{display:block}
 .cd-ring{position:relative;width:170px;height:170px;margin:0 auto}
@@ -250,7 +275,7 @@ body.wizard{padding-bottom:150px}
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Chi avvisare
     </div>
-    <p class="card-lead">Fino a 3 persone di fiducia. Basta il cellulare o l'email: meglio entrambi.</p>
+    <p class="card-lead">Fino a 3 persone di fiducia, più una Centrale operativa (facoltativa). Basta il cellulare o l'email: meglio entrambi.</p>
 
     <div class="contact">
       <div class="contact-h">Contatto 1 <span>Principale</span></div>
@@ -270,6 +295,13 @@ body.wizard{padding-bottom:150px}
       <div class="field"><label for="c3-tel">Cellulare</label><input type="tel" id="c3-tel" placeholder="+39 ..." autocomplete="off"/></div>
       <div class="field"><label for="c3-email">Email</label><input type="email" id="c3-email" autocomplete="off"/></div>
     </div>
+    <div class="contact">
+      <div class="contact-h">Centrale operativa <span class="opt">Facoltativo</span></div>
+      <p class="hint" style="text-align:left;margin:0 0 8px">Comune, Polizia locale o altro ente che ha accettato di ricevere gli allarmi. Riceve gli SMS e le email anche con il tuo indirizzo di casa.</p>
+      <div class="field"><label for="c4-nome">Nome ente</label><input type="text" id="c4-nome" placeholder="Es. Polizia Locale Caiazzo" autocapitalize="words"/></div>
+      <div class="field"><label for="c4-tel">Cellulare per gli SMS</label><input type="tel" id="c4-tel" placeholder="+39 ..." autocomplete="off"/></div>
+      <div class="field"><label for="c4-email">Email</label><input type="email" id="c4-email" autocomplete="off"/></div>
+    </div>
 
     <div class="field">
       <label for="cfg-call">Chi chiamare in caso di allarme</label>
@@ -277,19 +309,41 @@ body.wizard{padding-bottom:150px}
         <option value="1">Contatto 1</option>
         <option value="2">Contatto 2</option>
         <option value="3">Contatto 3</option>
+        <option value="0">Nessuna chiamata (solo SMS)</option>
         <option value="112">112 Numero unico emergenze</option>
       </select>
-      <div class="field-hint">L'SMS parte verso tutti i contatti con cellulare; l'email verso tutti quelli con email.</div>
+      <div class="field-hint">Ogni contatto con cellulare riceve il proprio SMS; l'email arriva a tutti quelli con email.</div>
     </div>
     <div class="field">
-      <label for="cfg-secs">Tempo per annullare (se premi per errore)</label>
-      <select id="cfg-secs">
-        <option value="5">5 secondi</option>
-        <option value="10" selected>10 secondi</option>
-        <option value="15">15 secondi</option>
-        <option value="30">30 secondi</option>
+      <label for="cfg-native">Cosa deve aprire il telefono all'allarme</label>
+      <select id="cfg-native">
+        <option value="sms">L'SMS già scritto per tutti i contatti (consigliato)</option>
+        <option value="call">Il tastierino per chiamare</option>
+        <option value="none">Niente</option>
       </select>
+      <div class="field-hint">Il telefono non permette alle app di chiamare o scrivere da sole: apre la schermata pronta e serve un tocco su "Chiama" o "Invia".</div>
     </div>
+    <div class="field">
+      <label for="cfg-hold">Per quanto tieni premuto SOS</label>
+      <select id="cfg-hold">
+        <option value="1">1 secondo</option>
+        <option value="2" selected>2 secondi (consigliato)</option>
+        <option value="3">3 secondi</option>
+      </select>
+      <div class="field-hint">Serve a evitare allarmi per errore.</div>
+    </div>
+  </div>
+
+  <!-- Autorizzazioni (solo app Android) -->
+  <div class="card" data-show="main,w4" data-native="1">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Autorizzazioni
+    </div>
+    <p class="card-lead">Per mandare gli SMS e chiamare da sola, l'app ha bisogno del tuo permesso. Si concede una volta sola.</p>
+    <div class="gps-bar"><div class="gps-dot" id="perm-dot"></div><span class="gps-text" id="perm-text">Verifica in corso…</span></div>
+    <button class="btn-sm" onclick="askPerms()">Concedi i permessi</button>
+    <p class="hint">Se il permesso SMS resta negato: <a href="#" onclick="SOSNative.openAppSettings();return false">apri le impostazioni dell'app</a>, tocca i tre puntini in alto a destra e, se compare, scegli "Consenti impostazioni limitate"; poi vai su Permessi, SMS, Consenti.</p>
   </div>
 
   <!-- GPS -->
@@ -310,7 +364,7 @@ body.wizard{padding-bottom:150px}
   <!-- Ultimo passo guida -->
   <div class="card" data-show="w4">
     <div class="card-title">Ultimo passo: fai una prova</div>
-    <p class="card-lead" style="margin-bottom:0">Premendo <b>Fine</b> vedrai il pulsante SOS. Sotto trovi la casella <b>Modalità prova</b>: spuntala, premi SOS e senti la sirena senza inviare nulla. Poi toglila.</p>
+    <p class="card-lead" style="margin-bottom:0">Premendo <b>Fine</b> vedrai il pulsante SOS. Sotto trovi la casella <b>Modalità prova</b>: spuntala, tieni premuto SOS e senti la sirena senza inviare nulla. Poi toglila.</p>
   </div>
 
   <!-- Avanzate: EmailJS -->
@@ -351,25 +405,21 @@ body.wizard{padding-bottom:150px}
   <!-- SOS -->
   <div class="card" data-show="main">
     <div class="sos-zone" id="sos-zone">
-      <button class="sos-btn" id="sos-btn" onclick="startCountdown()" aria-label="Attiva allarme SOS">
-        <span class="sos-word">SOS</span>
-        <span class="sos-sub" id="sos-sub">PREMI PER ATTIVARE</span>
-      </button>
-    </div>
-
-    <div class="cd-wrap" id="cd-wrap">
-      <div class="cd-ring">
-        <svg viewBox="0 0 160 160" width="170" height="170">
-          <circle class="cd-bg" cx="80" cy="80" r="68"/>
-          <circle class="cd-fill" id="cd-fill" cx="80" cy="80" r="68"/>
-        </svg>
-        <div class="cd-inner">
-          <span class="cd-num" id="cd-num">10</span>
-          <span class="cd-label">SECONDI</span>
-        </div>
+      <div class="ev-list">
+        <button class="ev-btn" data-type="furto" aria-label="SOS Furto: tieni premuto">
+          <span class="ev-ico">🏠</span>
+          <span class="ev-txt"><span class="ev-name">FURTO</span><span class="ev-sub">TIENI PREMUTO</span></span>
+        </button>
+        <button class="ev-btn" data-type="aggressione" aria-label="SOS Aggressione: tieni premuto">
+          <span class="ev-ico">⚠️</span>
+          <span class="ev-txt"><span class="ev-name">AGGRESSIONE</span><span class="ev-sub">TIENI PREMUTO</span></span>
+        </button>
+        <button class="ev-btn" data-type="malore" aria-label="SOS Malore o incidente: tieni premuto">
+          <span class="ev-ico">🚑</span>
+          <span class="ev-txt"><span class="ev-name">MALORE / INCIDENTE</span><span class="ev-sub">TIENI PREMUTO</span></span>
+        </button>
       </div>
-      <br/>
-      <button class="btn-cancel" onclick="cancelCountdown()">✕ Annulla allarme</button>
+      <p class="hint" id="sos-hint">Scegli cosa sta succedendo e tieni premuto il pulsante finché la barra è piena, poi rilascia.</p>
     </div>
 
     <div style="text-align:center">
@@ -382,10 +432,11 @@ body.wizard{padding-bottom:150px}
       <button class="act mail" onclick="actMail()">📧 Invia email</button>
       <button class="act share" onclick="actShare()">📍 Condividi</button>
     </div>
-    <div class="actions-note" id="actions-note">Se qualcosa non è partito da solo, usa questi pulsanti.</div>
+    <div class="actions-note" id="actions-note">Se qualcosa non si è aperto, usa questi pulsanti.</div>
 
     <label class="check"><input type="checkbox" id="cfg-test"/> Modalità prova (suona la sirena ma non invia nulla)</label>
     <div class="testbanner" id="testbanner">MODALITÀ PROVA ATTIVA: non verrà inviato nulla. Togli la spunta per usare l'app davvero.</div>
+    <button class="btn-sm" style="margin-top:12px" data-show="main" data-native="1" onclick="testSms()">Invia un SMS di prova al primo contatto</button>
     <div class="log" id="log"></div>
   </div>
 
@@ -409,22 +460,32 @@ body.wizard{padding-bottom:150px}
 </div>
 
 <script>
-let SECS = 10;
-const CIRC = 2 * Math.PI * 68;
+const CIRC = 2 * Math.PI * 94;
 
 let gpsCoords = null;
 let audioCtx = null, sirenOsc = null, sirenTimer = null, wakeLock = null;
-let sosActive = false, cdInterval = null, cdLeft = SECS, ejsReady = false;
+let sosActive = false, ejsReady = false, gpsWatch = null;
+let alarmSeq = 0;
+const EVENTS = {
+  furto:       { nome: 'FURTO',       sms: "ALLARME FURTO! Ci sono dei ladri/intrusi. Chiamate subito il 112.", cen: "ALLARME FURTO: ladri/intrusi in casa. Richiesta di intervento." },
+  aggressione: { nome: 'AGGRESSIONE', sms: "ALLARME AGGRESSIONE! Sono in pericolo. Chiamate subito il 112.", cen: "ALLARME AGGRESSIONE: persona in pericolo. Richiesta di intervento." },
+  malore:      { nome: 'MALORE/INCIDENTE', sms: "ALLARME MALORE/INCIDENTE! Ho bisogno di soccorso medico. Chiamate il 118.", cen: "ALLARME MALORE/INCIDENTE: richiesta di soccorso medico." }
+};
+let curType = 'furto', curBtn = null;
+const evBtns = () => Array.from(document.querySelectorAll('.ev-btn'));
+let holding = false, holdOK = false, holdStart = 0, holdRaf = 0;
 let wiz = false, wizStep = 1;
 const WIZ_MAX = 4;
+const NATIVE = (typeof window.SOSNative !== 'undefined');
+function nativePerms() { try { return JSON.parse(window.SOSNative.permissions()); } catch(e) { return {}; } }
 
 const FIELDS = {
-  'cfg-call':'sos_call','cfg-secs':'sos_secs',
+  'cfg-call':'sos_call','cfg-native':'sos_native','cfg-hold':'sos_hold',
   'id-nome':'sos_nome','id-cognome':'sos_cognome','id-cf':'sos_cf','id-nascita':'sos_nascita',
   'id-sangue':'sos_sangue','id-indirizzo':'sos_indirizzo','id-note':'sos_note'
 };
-[1,2,3].forEach(i => ['nome','tel','email'].forEach(f => { FIELDS[`c${i}-${f}`] = `c${i}_${f}`; }));
-const SELECTS = ['cfg-call','cfg-secs','id-sangue'];
+[1,2,3,4].forEach(i => ['nome','tel','email'].forEach(f => { FIELDS[`c${i}-${f}`] = `c${i}_${f}`; }));
+const SELECTS = ['cfg-call','cfg-native','cfg-hold','id-sangue'];
 
 const $ = id => document.getElementById(id);
 const val = id => ($(id).value || '').trim();
@@ -454,16 +515,21 @@ function loadConfig() {
   $('ejs-service').value  = load('ejs_service');
   $('ejs-template').value = load('ejs_template');
   $('cfg-test').addEventListener('change', updateTestUI);
-  SECS = parseInt(val('cfg-secs')) || 10;
   checkCF();
   initEJS();
   updateReady();
+  if (NATIVE) {
+    const f = $('cfg-native').closest('.field'); if (f) f.style.display = 'none';
+    updatePerms();
+    if (nativePerms().location) startGPSWatch();
+  }
+  try { navigator.permissions.query({ name: 'geolocation' }).then(r => { if (r.state === 'granted') startGPSWatch(); }).catch(() => {}); } catch(e) {}
   if (!load('sos_wizard')) startWizard(); else renderView();
 }
 
 /* ── Contatti ── */
 function getContacts() {
-  return [1,2,3].map(i => ({
+  return [1,2,3,4].map(i => ({
     n: i, nome: val(`c${i}-nome`), tel: val(`c${i}-tel`).replace(/[\s\-()]/g, ''), email: val(`c${i}-email`)
   })).filter(c => c.tel || c.email);
 }
@@ -471,6 +537,7 @@ const smsList = () => getContacts().filter(c => c.tel).map(c => c.tel);
 const mailList = () => getContacts().filter(c => c.email).map(c => c.email);
 function callNumber() {
   const sel = val('cfg-call');
+  if (sel === '0') return '';
   if (sel === '112') return '112';
   const c = getContacts().find(x => String(x.n) === sel && x.tel) || getContacts().find(x => x.tel);
   return c ? c.tel : '';
@@ -479,8 +546,19 @@ const testMode = () => $('cfg-test').checked;
 function updateTestUI() {
   const t = testMode();
   $('testbanner').classList.toggle('on', t);
-  $('sos-btn').classList.toggle('test', t);
-  $('sos-sub').textContent = t ? 'PROVA (NON INVIA)' : 'PREMI PER ATTIVARE';
+  evBtns().forEach(b => b.classList.toggle('test', t));
+  updateSosLabel();
+}
+function holdSecs() { return parseInt(val('cfg-hold')) || 2; }
+function updateSosLabel() {
+  if (holding) return;
+  const n = holdSecs(), t = testMode();
+  evBtns().forEach(b => {
+    const sub = b.querySelector('.ev-sub');
+    if (sosActive) sub.textContent = (b === curBtn) ? 'ALLARME ATTIVO' : '';
+    else sub.textContent = t ? 'PROVA · NON INVIA' : `TIENI PREMUTO ${n} SEC`;
+  });
+  if (!sosActive) $('sos-hint').textContent = `Scegli cosa sta succedendo e tieni premuto il pulsante per ${n} second${n === 1 ? 'o' : 'i'}, finché la barra è piena, poi rilascia.`;
 }
 
 /* ── Codice fiscale ── */
@@ -523,15 +601,17 @@ function anagLines(short) {
   if (a.nascita) L.push(`Nato/a il: ${a.nascita}`);
   if (a.sangue) L.push(`Gruppo sanguigno: ${a.sangue}`);
   if (a.indirizzo && !short) L.push(`Indirizzo: ${a.indirizzo}`);
-  if (a.note) L.push(`Note mediche: ${short && a.note.length > 80 ? a.note.slice(0, 77) + '…' : a.note}`);
+  if (a.note) L.push(`Note mediche: ${short && a.note.length > 80 ? a.note.slice(0, 77) + '...' : a.note}`);
   return L;
 }
 
 /* ── Stato configurazione ── */
 function updateReady() {
+  updateSosLabel();
   const missing = [], a = getAnag();
   if (!a.nome || !a.cognome) missing.push('nome e cognome');
   if (!getContacts().length) missing.push('almeno un contatto');
+  if (NATIVE && !nativePerms().sms) missing.push('permesso SMS');
   const el = $('ready');
   if (missing.length) {
     el.className = 'ready todo';
@@ -550,7 +630,9 @@ function renderView() {
   document.body.classList.toggle('wizard', wiz);
   document.querySelectorAll('[data-show]').forEach(el => {
     const t = el.dataset.show.split(',');
-    el.style.display = (wiz ? t.includes('w' + wizStep) : t.includes('main')) ? '' : 'none';
+    let on = wiz ? t.includes('w' + wizStep) : t.includes('main');
+    if (el.dataset.native && !NATIVE) on = false;
+    el.style.display = on ? '' : 'none';
   });
   $('wizbar').style.display = wiz ? '' : 'none';
   if (wiz) {
@@ -570,6 +652,7 @@ function wizMove(d) {
     let err = '';
     if (wizStep === 2 && (!val('id-nome') || !val('id-cognome'))) err = 'Scrivi almeno nome e cognome per continuare.';
     if (wizStep === 3 && !getContacts().length) err = 'Inserisci almeno un cellulare o un\'email del Contatto 1.';
+    if (wizStep === 4 && NATIVE && !nativePerms().sms) err = 'Tocca "Concedi i permessi" e consenti l\'invio di SMS per continuare.';
     if (err) { msg.textContent = err; msg.classList.add('on'); return; }
     if (wizStep === WIZ_MAX) { endWizard(); return; }
   }
@@ -607,9 +690,9 @@ function buildEmailText(coords) {
   const dt = new Date().toLocaleString('it-IT');
   const maps = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
   const gps = coords ? `${coords.lat}, ${coords.lng} (precisione ±${coords.acc} m)` : 'Non disponibile';
-  return `ALLARME DI EMERGENZA\n\nData e ora: ${dt}\n\n${anagLines(false).join('\n') || 'Dati anagrafici non compilati'}\n\nCoordinate GPS: ${gps}\nGoogle Maps: ${maps}\n\nMessaggio inviato dall'app SOS Emergenza.`;
+  return `ALLARME ${EVENTS[curType].nome}\n\nData e ora: ${dt}\n\n${anagLines(false).join('\n') || 'Dati anagrafici non compilati'}\n\nCoordinate GPS: ${gps}\nGoogle Maps: ${maps}\n\nMessaggio inviato dall'app SOS Emergenza.`;
 }
-async function sendViaEmailJS(coords, contact) {
+async function sendViaEmailJS(coords, contact, update) {
   const a = getAnag();
   const maps = coords ? `https://www.google.com/maps?q=${coords.lat},${coords.lng}` : 'N/D';
   const gps = coords ? `${coords.lat}, ${coords.lng} (±${coords.acc}m)` : 'Non disponibile';
@@ -619,7 +702,7 @@ async function sendViaEmailJS(coords, contact) {
     fiscal_code: a.cf, birth_date: a.nascita, blood_group: a.sangue,
     medical_notes: a.note, address: a.indirizzo,
     gps_coords: gps, maps_link: maps, datetime: new Date().toLocaleString('it-IT'),
-    message: buildEmailText(coords)
+    message: (update ? 'AGGIORNAMENTO POSIZIONE (l\'allarme è ancora attivo)\n\n' : '') + buildEmailText(coords)
   });
 }
 async function testEmail() {
@@ -638,11 +721,15 @@ function setGPS(pos) {
   $('gps-dot').className = 'gps-dot ok';
   $('gps-text').textContent = `${gpsCoords.lat}, ${gpsCoords.lng}  (±${gpsCoords.acc} m)`;
 }
+function startGPSWatch() {
+  if (gpsWatch !== null || !navigator.geolocation) return;
+  try { gpsWatch = navigator.geolocation.watchPosition(setGPS, () => {}, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 }); } catch(e) {}
+}
 function getGPS() {
   if (!navigator.geolocation) { gpsErr('GPS non supportato'); return; }
   $('gps-dot').className = 'gps-dot spin';
   $('gps-text').textContent = 'Acquisizione in corso…';
-  navigator.geolocation.getCurrentPosition(setGPS, () => gpsErr('Permesso negato o timeout. Riprova.'), { enableHighAccuracy: true, timeout: 12000 });
+  navigator.geolocation.getCurrentPosition(pos => { setGPS(pos); startGPSWatch(); }, () => gpsErr('Permesso negato o timeout. Riprova.'), { enableHighAccuracy: true, timeout: 12000 });
 }
 function gpsErr(msg) { $('gps-dot').className = 'gps-dot err'; $('gps-text').textContent = msg; }
 
@@ -661,10 +748,8 @@ function log(msg, type = 'info') {
   const s = document.createElement('span'); s.textContent = msg; d.appendChild(s);
   $('log').prepend(d);
 }
-function setRing(frac) {
-  const el = $('cd-fill');
-  el.style.strokeDasharray = CIRC;
-  el.style.strokeDashoffset = CIRC * (1 - frac);
+function setHoldRing(frac) {
+  if (curBtn) curBtn.style.setProperty('--p', frac);
 }
 
 /* ── Audio ── */
@@ -709,62 +794,69 @@ function stopSiren() {
   if (sirenOsc) { try { sirenOsc.stop(); } catch(e) {} sirenOsc = null; }
   if (audioCtx) { try { audioCtx.close(); } catch(e) {} audioCtx = null; }
 }
-async function lockScreen() { try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
-function unlockScreen() { try { if (wakeLock) wakeLock.release(); } catch(e) {} wakeLock = null; }
+async function lockScreen() { if (NATIVE) { try { SOSNative.keepScreenOn(true); } catch(e) {} } try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {} }
+function unlockScreen() { if (NATIVE) { try { SOSNative.keepScreenOn(false); } catch(e) {} } try { if (wakeLock) wakeLock.release(); } catch(e) {} wakeLock = null; }
 
-/* ── Countdown ── */
-function startCountdown() {
+/* ── Tocco prolungato ── */
+function holdBegin(btn) {
+  if (sosActive || holding) return;
+  curBtn = btn; curType = btn.dataset.type;
   if (!getContacts().length) { log('Inserisci almeno un contatto da avvisare (cellulare o email).', 'warn'); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-  const a = getAnag();
-  if (!a.nome || !a.cognome) log('Consiglio: compila nome e cognome, così chi riceve l\'allarme sa chi sei.', 'warn');
+  holding = true; holdOK = false; holdStart = performance.now();
+  curBtn.classList.add('holding');
   ensureAudioCtx();
-  SECS = parseInt(val('cfg-secs')) || 10;
-  $('log').innerHTML = '';
-  $('sos-zone').style.display = 'none';
-  $('cd-wrap').classList.add('on');
-  cdLeft = SECS;
-  $('cd-num').textContent = SECS;
-  setRing(1);
-  log(`Allarme tra ${SECS} secondi. Premi "Annulla" se è un errore.`, 'warn');
-  cdInterval = setInterval(() => {
-    cdLeft--;
-    $('cd-num').textContent = cdLeft;
-    setRing(cdLeft / SECS);
-    beep(cdLeft <= 3 ? 900 : 520, 0.15);
-    if (cdLeft <= 0) {
-      clearInterval(cdInterval); cdInterval = null;
-      $('cd-wrap').classList.remove('on');
-      $('sos-zone').style.display = '';
-      triggerSOS();
-    }
-  }, 1000);
+  try { navigator.vibrate && navigator.vibrate(30); } catch(e) {}
+  holdTick();
 }
-function cancelCountdown() {
-  if (cdInterval) { clearInterval(cdInterval); cdInterval = null; }
-  $('cd-wrap').classList.remove('on');
-  $('sos-zone').style.display = '';
-  stopSiren();
-  log('Allarme annullato: non è stato inviato nulla.', 'warn');
+function holdTick() {
+  if (!holding) return;
+  const f = Math.min(1, (performance.now() - holdStart) / (holdSecs() * 1000));
+  setHoldRing(f);
+  if (f >= 1 && !holdOK) {
+    holdOK = true;
+    curBtn.classList.add('ready');
+    curBtn.querySelector('.ev-sub').textContent = 'RILASCIA ORA';
+    try { navigator.vibrate && navigator.vibrate([80, 40, 80]); } catch(e) {}
+    beep(880, 0.15);
+  }
+  holdRaf = requestAnimationFrame(holdTick);
 }
+function holdReset() {
+  holding = false; cancelAnimationFrame(holdRaf);
+  setHoldRing(0);
+  if (curBtn) curBtn.classList.remove('holding', 'ready');
+  updateSosLabel();
+}
+function holdEnd() {
+  if (!holding) return;
+  const ok = holdOK;
+  holdReset();
+  if (ok) triggerSOS();
+  else log(`Tieni premuto più a lungo: servono ${holdSecs()} secondi, per evitare allarmi per errore.`, 'warn');
+}
+function holdCancel() { if (holding) holdReset(); }
 
 /* ── Azioni (anche come pulsanti manuali di riserva) ── */
-function buildSMSText(coords) {
-  const maps = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : '';
-  const gps = coords ? `${coords.lat},${coords.lng} (±${coords.acc}m)` : 'GPS non disponibile';
-  return `🚨 ALLARME EMERGENZA\n${anagLines(true).join('\n')}\nOra: ${new Date().toLocaleString('it-IT')}\nGPS: ${gps}${maps ? '\nMappa: ' + maps : ''}`;
+function buildSMSText(coords, centrale) {
+  const maps = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : 'posizione non disponibile';
+  const ora = new Date().toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+  const L = anagLines(true); if (centrale && getAnag().indirizzo) L.push(`Indirizzo: ${getAnag().indirizzo}`);
+  return `${centrale ? EVENTS[curType].cen : EVENTS[curType].sms}\n${L.join('\n')}\nOra: ${ora}\nPosizione: ${maps}`;
 }
 function actSMS() {
   const list = smsList(); if (!list.length) { log('Nessun cellulare configurato per l\'SMS.', 'warn'); return; }
+  if (NATIVE) { sendNativeSms(list, buildSMSText(gpsCoords)); return; }
   const sep = /iP(hone|ad|od)/.test(navigator.userAgent) ? '&' : '?';
   window.location.href = `sms:${list.join(',')}${sep}body=${encodeURIComponent(buildSMSText(gpsCoords))}`;
 }
 function actCall() {
   const n = callNumber(); if (!n) { log('Nessun numero da chiamare configurato.', 'warn'); return; }
+  if (NATIVE) { log(`Chiamata verso ${n}…`, 'info'); SOSNative.call(n); return; }
   window.location.href = `tel:${n}`;
 }
 function actMail() {
   const list = mailList(); if (!list.length) { log('Nessuna email configurata.', 'warn'); return; }
-  window.location.href = `mailto:${list.join(',')}?subject=${encodeURIComponent('ALLARME EMERGENZA - richiesta soccorso')}&body=${encodeURIComponent(buildEmailText(gpsCoords))}`;
+  window.location.href = `mailto:${list.join(',')}?subject=${encodeURIComponent('ALLARME ' + EVENTS[curType].nome + ' - richiesta soccorso')}&body=${encodeURIComponent(buildEmailText(gpsCoords))}`;
 }
 async function actShare() {
   const text = buildSMSText(gpsCoords);
@@ -774,82 +866,172 @@ async function actShare() {
   } catch(e) {}
 }
 
+/* ── App Android: SMS e chiamata dirette ── */
+function askPerms() { if (NATIVE) SOSNative.requestPermissions(); }
+function updatePerms() {
+  if (!NATIVE) return;
+  const p = nativePerms(), yn = v => v ? 'sì' : 'NO';
+  $('perm-text').textContent = `SMS: ${yn(p.sms)} · Chiamata: ${yn(p.call)} · Posizione: ${yn(p.location)}`;
+  $('perm-dot').className = 'gps-dot ' + ((p.sms && p.call && p.location) ? 'ok' : 'err');
+  if (p.location) startGPSWatch();
+  updateReady();
+}
+window.onPermissions = () => updatePerms();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) updatePerms(); });
+function contactName(num) {
+  const c = getContacts().find(x => x.tel === num);
+  return c ? (c.nome || num) : (num || 'contatto');
+}
+window.onSmsResult = r => {
+  if (!r) return;
+  const who = contactName(r.num);
+  if (r.status === 'sent') log(`SMS inviato a ${who}.`, 'ok');
+  else log(`SMS NON inviato a ${who}: ${String(r.status).replace('error:', '')}.`, 'err');
+};
+window.onCallError = () => log('Non sono riuscito ad avviare la chiamata.', 'err');
+function sendNativeSms(list, text) {
+  if (!nativePerms().sms) { log('Manca il permesso SMS: vai su "Autorizzazioni" e tocca "Concedi i permessi".', 'err'); return; }
+  log(`Invio SMS a ${list.length} contatt${list.length === 1 ? 'o' : 'i'}…`, 'purple');
+  SOSNative.sendSms(JSON.stringify(list), text);
+}
+function nativeSend(test) {
+  const nums = smsList(), n = callNumber();
+  const famNums = getContacts().filter(c => c.tel && c.n <= 3).map(c => c.tel);
+  const cenNums = getContacts().filter(c => c.tel && c.n === 4).map(c => c.tel);
+  if (!nums.length) log('Nessun cellulare tra i contatti: nessun SMS da inviare.', 'warn');
+  else if (test) log(`PROVA: avrei inviato ${nums.length} SMS (uno per contatto).`, 'info');
+  else {
+    if (famNums.length) sendNativeSms(famNums, buildSMSText(gpsCoords));
+    if (cenNums.length) sendNativeSms(cenNums, buildSMSText(gpsCoords, true));
+  }
+  if (!n) return;
+  if (test) { log(`PROVA: avrei chiamato ${n}.`, 'info'); return; }
+  setTimeout(() => {
+    if (!sosActive) return;
+    log(`Chiamata verso ${n}…`, 'info');
+    SOSNative.call(n);
+  }, 1500);
+}
+function testSms() {
+  if (!NATIVE) return;
+  const c = getContacts().find(x => x.tel);
+  if (!c) { log('Inserisci prima il cellulare di un contatto.', 'warn'); return; }
+  const nome = `${getAnag().nome} ${getAnag().cognome}`.trim() || 'un utente';
+  sendNativeSms([c.tel], `SOS Emergenza: questo e' un SMS di PROVA inviato da ${nome}. Nessun pericolo.`);
+}
+
 /* ── SOS principale ── */
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+function nativeAction(test) {
+  const mode = val('cfg-native') || 'sms';
+  if (mode === 'none') return;
+  if (mode === 'sms') {
+    if (!smsList().length) { log('Nessun cellulare configurato per l\'SMS.', 'warn'); return; }
+    log('Ho aperto l\'app SMS con il messaggio già scritto: premi "Invia".', 'info');
+    actSMS(); return;
+  }
+  const n = callNumber();
+  if (!n) { log('Nessun numero da chiamare configurato.', 'warn'); return; }
+  if (test && n === '112') { log('PROVA: con il 112 non apro il tastierino.', 'info'); return; }
+  log(IS_IOS ? `Ho chiesto al telefono di chiamare ${n}: conferma sulla finestra che compare.`
+             : `Ho aperto il tastierino con il numero ${n}: premi il tasto verde per chiamare.`, 'info');
+  actCall();
+}
+
 async function triggerSOS() {
   sosActive = true;
+  const myId = ++alarmSeq;
+  updateSosLabel();
   const test = testMode();
   const mails = getContacts().filter(c => c.email);
-  const hasSms = smsList().length > 0, callNum = callNumber();
+  const hadCoords = !!gpsCoords;
 
-  $('sos-btn').classList.add('pulsing');
+  curBtn.classList.add('pulsing');
   $('btn-stop').classList.add('on');
   $('actions').classList.add('on'); $('actions-note').classList.add('on');
+  $('log').innerHTML = '';
   lockScreen();
   try { navigator.vibrate && navigator.vibrate(Array(30).fill([500, 250]).flat()); } catch(e) {}
 
-  log(test ? '🧪 PROVA: allarme simulato, non viene inviato nulla.' : '🚨 Allarme SOS attivato!', test ? 'info' : 'err');
+  log(test ? `🧪 PROVA (${EVENTS[curType].nome}): allarme simulato, non viene inviato nulla.` : `🚨 Allarme ${EVENTS[curType].nome} attivato!`, test ? 'info' : 'err');
   startSiren();
   log('Sirena attivata.', 'info');
-  log('Acquisizione posizione GPS…', 'info');
-
-  await new Promise(resolve => {
-    if (!navigator.geolocation) { log('GPS non supportato.', 'warn'); resolve(); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => { setGPS(pos); log(`Posizione: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc} m)`, 'ok'); resolve(); },
-      () => { log('GPS non disponibile: procedo senza coordinate.', 'warn'); resolve(); },
-      { enableHighAccuracy: true, timeout: 7000 }
-    );
-  });
-
-  if (test) {
-    log('Prova completata. L\'allarme si ferma tra 4 secondi.', 'ok');
-    setTimeout(() => { if (sosActive) stopSOS(); }, 4000);
-    return;
-  }
-
   const a = getAnag();
   if (a.nome || a.cf) log(`Dati anagrafici inclusi: ${anagLines(true).slice(0, 2).join(' · ')}`, 'info');
+  log(hadCoords ? `Ultima posizione nota: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc} m)` : 'Posizione non ancora disponibile: la cerco.', hadCoords ? 'ok' : 'warn');
 
-  /* EMAIL a tutti i contatti con email */
-  if (mails.length) {
+  /* 1. Email subito, con l'ultima posizione nota (parte prima che il telefono cambi schermata) */
+  let jobs = [];
+  if (!test && mails.length) {
     if (ejsReady) {
-      log(`Invio email automatica a ${mails.length} contatt${mails.length === 1 ? 'o' : 'i'}…`, 'purple');
-      let okN = 0;
-      for (const c of mails) {
-        try { await sendViaEmailJS(gpsCoords, c); okN++; }
-        catch(e) { log(`Email a ${c.nome || c.email} non inviata (${e.text || e.message || 'errore'}).`, 'warn'); }
-      }
-      if (okN) log(`Email inviate: ${okN} su ${mails.length}.`, 'ok');
-      if (okN < mails.length) log('Per le email mancanti usa il tasto "Invia email".', 'warn');
+      log(`Invio email a ${mails.length} contatt${mails.length === 1 ? 'o' : 'i'}…`, 'purple');
+      jobs = mails.map(c => sendViaEmailJS(gpsCoords, c).then(() => ({ ok: true, c }), e => ({ ok: false, c, e })));
     } else {
       log('Invio automatico email non attivo: usa il tasto "Invia email".', 'warn');
     }
   }
 
-  /* SMS a tutti: si apre già scritto, va confermato con "Invia" */
-  if (hasSms) {
-    setTimeout(() => { log('SMS pronto per tutti i contatti: premi "Invia" nell\'app Messaggi.', 'info'); actSMS(); }, mails.length ? 1200 : 400);
+  /* 2. Telefono: dentro il gesto dell'utente, l'unico momento in cui il browser lo permette */
+  if (NATIVE) nativeSend(test); else nativeAction(test);
+
+  /* 3. Posizione fresca, senza bloccare nulla */
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        setGPS(pos);
+        log(`Posizione aggiornata: ${gpsCoords.lat}, ${gpsCoords.lng} (±${gpsCoords.acc} m)`, 'ok');
+        if (!hadCoords && !test && ejsReady && sosActive) mails.forEach(c => sendViaEmailJS(gpsCoords, c, true).catch(() => {}));
+        if (!hadCoords && !test && NATIVE && sosActive && smsList().length && nativePerms().sms) {
+          const nm = `${getAnag().nome} ${getAnag().cognome}`.trim() || 'SOS';
+          SOSNative.sendSms(JSON.stringify(smsList()), `${nm} (${EVENTS[curType].nome}): posizione aggiornata https://maps.google.com/?q=${gpsCoords.lat},${gpsCoords.lng}`);
+        }
+      },
+      () => log('GPS non disponibile.', 'warn'),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
   }
-  /* CHIAMATA */
-  if (callNum) {
-    const d = hasSms ? 6000 : (mails.length ? 1500 : 400);
-    setTimeout(() => { if (sosActive) { log(`Avvio chiamata verso ${callNum}…`, 'info'); actCall(); } }, d);
+
+  if (test) {
+    log('Prova completata. L\'allarme si ferma tra 6 secondi.', 'ok');
+    setTimeout(() => { if (sosActive && myId === alarmSeq) stopSOS(); }, 6000);
+    return;
+  }
+
+  /* 4. Esito email */
+  if (jobs.length) {
+    const res = await Promise.all(jobs);
+    const okN = res.filter(r => r.ok).length;
+    res.filter(r => !r.ok).forEach(r => log(`Email a ${r.c.nome || r.c.email} non inviata (${(r.e && (r.e.text || r.e.message)) || 'errore'}).`, 'warn'));
+    if (okN) log(`Email inviate: ${okN} su ${mails.length}.`, 'ok');
+    if (okN < mails.length) log('Per le email mancanti usa il tasto "Invia email".', 'warn');
   }
 }
 
 function stopSOS() {
   sosActive = false;
+  updateSosLabel();
   stopSiren(); unlockScreen();
   try { navigator.vibrate && navigator.vibrate(0); } catch(e) {}
-  $('sos-btn').classList.remove('pulsing');
+  evBtns().forEach(b => b.classList.remove('pulsing'));
   $('btn-stop').classList.remove('on');
   $('actions').classList.remove('on'); $('actions-note').classList.remove('on');
   log('Allarme interrotto.', 'warn');
 }
 
+(function bindSOS() {
+  evBtns().forEach(b => {
+    b.addEventListener('pointerdown', e => { if (e.button > 0) return; try { b.setPointerCapture(e.pointerId); } catch(_) {} e.preventDefault(); holdBegin(b); });
+    b.addEventListener('pointerup', e => { e.preventDefault(); holdEnd(); });
+    b.addEventListener('pointercancel', holdCancel);
+    b.addEventListener('contextmenu', e => e.preventDefault());
+    b.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); holdBegin(b); } });
+    b.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); holdEnd(); } });
+  });
+})();
+
 loadConfig();
 
-if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+if ('serviceWorker' in navigator && location.protocol.startsWith('http') && !NATIVE) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>

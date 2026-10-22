@@ -1,4 +1,4 @@
-const C = 'sos-v3-1';
+const C = 'sos-v4-0';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
